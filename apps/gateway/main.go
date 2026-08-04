@@ -8,11 +8,11 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/gatewayx/gatewayx/internal/config"
-	"github.com/gatewayx/gatewayx/internal/health"
-	"github.com/gatewayx/gatewayx/internal/logger"
-	"github.com/gatewayx/gatewayx/internal/middleware"
-	"github.com/gatewayx/gatewayx/internal/proxy"
+	"github.com/oni1997/gatewayx/internal/config"
+	"github.com/oni1997/gatewayx/internal/health"
+	"github.com/oni1997/gatewayx/internal/logger"
+	"github.com/oni1997/gatewayx/internal/middleware"
+	"github.com/oni1997/gatewayx/internal/proxy"
 )
 
 var (

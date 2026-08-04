@@ -5,8 +5,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/gatewayx/gatewayx/internal/config"
-	"github.com/gatewayx/gatewayx/internal/proxy"
+	"github.com/oni1997/gatewayx/internal/config"
+	"github.com/oni1997/gatewayx/internal/proxy"
 )
 
 func TestProxyStartup(t *testing.T) {

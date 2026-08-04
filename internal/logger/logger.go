@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/gatewayx/gatewayx/internal/config"
+	"github.com/oni1997/gatewayx/internal/config"
 )
 
 func New(cfg config.LoggingConfig) *slog.Logger {

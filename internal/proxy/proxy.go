@@ -11,9 +11,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/gatewayx/gatewayx/internal/auth"
-	"github.com/gatewayx/gatewayx/internal/config"
-	"github.com/gatewayx/gatewayx/pkg/loadbalancer"
+	"github.com/oni1997/gatewayx/internal/auth"
+	"github.com/oni1997/gatewayx/internal/config"
+	"github.com/oni1997/gatewayx/pkg/loadbalancer"
 )
 
 type ReverseProxy struct {

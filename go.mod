@@ -1,4 +1,4 @@
-module github.com/gatewayx/gatewayx
+module github.com/oni1997/gatewayx
 
 go 1.25.12
 

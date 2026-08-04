@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/gatewayx/gatewayx/internal/config"
+	"github.com/oni1997/gatewayx/internal/config"
 )
 
 func loadConfig(configFile string) (*config.Config, error) {
