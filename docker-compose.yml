@@ -1,0 +1,23 @@
+version: "3.8"
+
+services:
+  gatewayx:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+      - "9090:9090"
+    volumes:
+      - ./gatewayx.example.yaml:/etc/gatewayx/gatewayx.yaml
+    command: ["-c", "/etc/gatewayx/gatewayx.yaml"]
+
+  backend:
+    image: nginx:alpine
+    ports:
+      - "3000:80"
+
+  backend2:
+    image: nginx:alpine
+    ports:
+      - "3001:80"

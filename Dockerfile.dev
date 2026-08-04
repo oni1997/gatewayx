@@ -1,0 +1,20 @@
+FROM golang:1.23-alpine
+
+RUN apk add --no-cache git
+
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+
+RUN go build -o /gatewayx ./apps/gateway
+
+FROM alpine:3.20
+
+RUN apk add --no-cache ca-certificates curl
+COPY --from=0 /gatewayx /usr/local/bin/gatewayx
+
+EXPOSE 8080 9090
+
+ENTRYPOINT ["gatewayx"]

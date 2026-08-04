@@ -1,0 +1,43 @@
+server:
+  host: "0.0.0.0"
+  port: 8080
+
+routes:
+  - name: "docker-backend"
+    listen_path: "/api"
+    upstream_urls:
+      - "http://backend:80"
+    methods:
+      - GET
+      - POST
+    strip_path: false
+    timeout: 30s
+
+  - name: "docker-health"
+    listen_path: "/"
+    upstream_urls:
+      - "http://backend:80"
+    methods:
+      - GET
+    timeout: 30s
+
+logging:
+  level: "info"
+  format: "json"
+
+metrics:
+  enabled: true
+  port: 9090
+
+health:
+  enabled: true
+  path: "/health"
+
+plugins:
+  dir: "./plugins"
+
+security:
+  max_body_size: 10485760
+
+tls:
+  enabled: false

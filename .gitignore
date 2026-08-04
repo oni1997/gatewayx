@@ -1,0 +1,54 @@
+# Binaries
+bin/
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Test binary
+*.test
+
+# Output
+*.out
+
+# Go workspace
+go.work
+go.work.sum
+
+# Dependencies
+vendor/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Configuration with secrets
+gatewayx.yaml
+!gatewayx.example.yaml
+
+# Coverage
+coverage.out
+coverage.html
+
+# Build artifacts
+dist/
+
+# Temporary
+tmp/
+temp/
+
+# Docker
+*.tar
+create.md

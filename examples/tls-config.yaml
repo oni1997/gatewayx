@@ -1,0 +1,22 @@
+server:
+  host: "0.0.0.0"
+  port: 8443
+
+routes:
+  - name: "secure-api"
+    listen_path: "/api"
+    upstream_urls:
+      - "http://localhost:3000"
+    methods:
+      - GET
+      - POST
+
+tls:
+  enabled: true
+  cert_file: "/etc/gatewayx/certs/cert.pem"
+  key_file: "/etc/gatewayx/certs/key.pem"
+  min_version: "1.2"
+
+logging:
+  level: "info"
+  format: "json"
