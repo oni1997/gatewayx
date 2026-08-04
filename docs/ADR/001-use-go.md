@@ -9,10 +9,10 @@ Accepted
 We need to choose a primary language for the GatewayX core. The gateway must be high-performance, have low resource overhead, produce a single static binary, and be easy to deploy.
 
 Candidates considered:
-- **Go** — Fast compilation, excellent concurrency, single binary, strong standard library
-- **Rust** — Maximum performance, but steeper learning curve and slower iteration
-- **Node.js** — Large ecosystem, but higher resource usage and complex deployment
-- **Java** — Mature ecosystem, but high memory overhead and slow startup
+- **Go** -- Fast compilation, excellent concurrency, single binary, strong standard library
+- **Rust** -- Maximum performance, but steeper learning curve and slower iteration
+- **Node.js** -- Large ecosystem, but higher resource usage and complex deployment
+- **Java** -- Mature ecosystem, but high memory overhead and slow startup
 
 ## Decision
 

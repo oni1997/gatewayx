@@ -4,10 +4,10 @@ The GatewayX dashboard provides a web-based interface for managing routes, users
 
 ## Technology
 
-- **React** — Component-based UI library
-- **TypeScript** — Type-safe JavaScript
-- **Tailwind CSS** — Utility-first CSS framework
-- **Vite** — Fast build tool and dev server
+- **React** -- Component-based UI library
+- **TypeScript** -- Type-safe JavaScript
+- **Tailwind CSS** -- Utility-first CSS framework
+- **Vite** -- Fast build tool and dev server
 
 ## Pages
 

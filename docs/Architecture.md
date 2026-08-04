@@ -48,10 +48,10 @@ Host- and path-based request routing. Matches incoming requests against configur
 ### Middleware Pipeline (`internal/middleware`)
 
 Composable middleware chain:
-- **Recovery** — Panic recovery
-- **CORS** — Cross-origin resource sharing
-- **MaxBodySize** — Request body size limiting
-- **Headers** — Response header injection
+- **Recovery** -- Panic recovery
+- **CORS** -- Cross-origin resource sharing
+- **MaxBodySize** -- Request body size limiting
+- **Headers** -- Response header injection
 
 ### Configuration (`internal/config`)
 
@@ -78,9 +78,9 @@ Pluggable load balancing strategies:
 ### CLI (`apps/cli`)
 
 Command-line tool built with Cobra:
-- `gatewayx serve` — Start the gateway
-- `gatewayx validate` — Validate configuration
-- `gatewayx version` — Print version info
+- `gatewayx serve` -- Start the gateway
+- `gatewayx validate` -- Validate configuration
+- `gatewayx version` -- Print version info
 
 ## Data Flow
 

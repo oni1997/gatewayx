@@ -3,16 +3,16 @@
 ## Development Philosophy
 
 Every contribution must satisfy:
-- **Easy to understand** — Clear code, clear intent
-- **Easy to configure** — Configuration-driven, not code-driven
-- **Production ready** — Tested, monitored, documented
-- **Fast** — Performance is a feature
-- **Well documented** — Code comments, docs, and examples
+- **Easy to understand** -- Clear code, clear intent
+- **Easy to configure** -- Configuration-driven, not code-driven
+- **Production ready** -- Tested, monitored, documented
+- **Fast** -- Performance is a feature
+- **Well documented** -- Code comments, docs, and examples
 
 ## Getting Started
 
 ```bash
-git clone https://github.com/gatewayx/gatewayx.git
+git clone https://github.com/oni1997/gatewayx.git
 cd gatewayx
 make dev
 ```
@@ -20,12 +20,12 @@ make dev
 ## Project Structure
 
 ```
-apps/       — Application entry points
-internal/   — Internal packages (not importable externally)
-pkg/        — Shared, importable packages
-plugins/    — Plugin implementations
-docs/       — Documentation
-tests/      — Integration and e2e tests
+apps/       -- Application entry points
+internal/   -- Internal packages (not importable externally)
+pkg/        -- Shared, importable packages
+plugins/    -- Plugin implementations
+docs/       -- Documentation
+tests/      -- Integration and e2e tests
 ```
 
 ## Development Workflow

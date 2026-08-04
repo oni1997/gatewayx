@@ -9,10 +9,10 @@ Accepted
 GatewayX needs a configuration format that is human-readable, easy to version control, and familiar to the target audience (DevOps engineers and backend developers).
 
 Candidates considered:
-- **YAML** — Human-friendly, supports comments, widely used in infrastructure
-- **TOML** — Simpler than YAML, but less ecosystem support
-- **JSON** — No comments support, verbose for humans
-- **HCL** — Powerful but complex, steep learning curve
+- **YAML** -- Human-friendly, supports comments, widely used in infrastructure
+- **TOML** -- Simpler than YAML, but less ecosystem support
+- **JSON** -- No comments support, verbose for humans
+- **HCL** -- Powerful but complex, steep learning curve
 
 ## Decision
 

@@ -8,7 +8,7 @@
 ## Build from Source
 
 ```bash
-git clone https://github.com/gatewayx/gatewayx.git
+git clone https://github.com/oni1997/gatewayx.git
 cd gatewayx
 
 go build -o bin/gatewayx ./apps/gateway
