@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"strings"
 	"sync"
 	"time"
 
@@ -208,40 +209,137 @@ func (sw *statusWriter) WriteHeader(code int) {
 }
 
 func buildAuthenticator(ac *config.AuthConfig) (auth.Authenticator, error) {
+	opts := ac.AllOptions()
+
 	switch ac.Type {
 	case auth.NameJWT:
-		opts := ac.JWTOptions()
-		algo := opts["algorithm"]
-		secret := opts["secret"]
-		secretFile := opts["secret_file"]
-		publicKeyFile := opts["public_key_file"]
-
-		return auth.NewJWT(auth.JWTOptions{
-			Secret:        secret,
-			SecretFile:    secretFile,
-			PublicKeyFile: publicKeyFile,
-			Algorithm:     algo,
+		cacheTTL := parseDuration(opts["cache_ttl"])
+		ja, err := auth.NewJWT(auth.JWTOptions{
+			Secret:        opts["secret"],
+			SecretFile:    opts["secret_file"],
+			PublicKeyFile: opts["public_key_file"],
+			Algorithm:     opts["algorithm"],
 		})
+		if err != nil {
+			return nil, err
+		}
+		if cacheTTL > 0 {
+			return auth.NewCachedJWT(ja, cacheTTL), nil
+		}
+		return ja, nil
 
 	case auth.NameAPIKey:
-		opts := ac.APIKeyOptions()
 		keysFile := opts["keys_file"]
 		headerName := opts["header"]
-
 		inlineKeys := make(map[string]string)
 		for k, v := range opts {
 			if k != "keys_file" && k != "header" && k != "type" {
 				inlineKeys[k] = v
 			}
 		}
-
 		return auth.NewAPIKey(auth.APIKeyOptions{
 			Keys:       inlineKeys,
 			KeysFile:   keysFile,
 			HeaderName: headerName,
 		})
 
+	case auth.NameBasic:
+		htpasswdFile := opts["htpasswd_file"]
+		realm := opts["realm"]
+		inlineUsers := make(map[string]string)
+		for k, v := range opts {
+			if k != "htpasswd_file" && k != "realm" && k != "type" {
+				inlineUsers[k] = v
+			}
+		}
+		return auth.NewBasic(auth.BasicOptions{
+			Users:    inlineUsers,
+			Htpasswd: htpasswdFile,
+			Realm:    realm,
+		})
+
+	case auth.NameHMAC:
+		algo := opts["algorithm"]
+		headerName := opts["header"]
+		skew := parseDuration(opts["clock_skew"])
+		return auth.NewHMAC(auth.HMACOptions{
+			Secret:     opts["secret"],
+			Algorithm:  algo,
+			HeaderName: headerName,
+			ClockSkew:  skew,
+		})
+
+	case "rbac":
+		rolesClaim := opts["roles_claim"]
+		delegateType := opts["delegate"]
+		delegateAc := &config.AuthConfig{
+			Type:    delegateType,
+			Options: ac.Options,
+		}
+		delegate, err := buildAuthenticator(delegateAc)
+		if err != nil {
+			return nil, fmt.Errorf("rbac delegate auth: %w", err)
+		}
+		engine := buildRBACEngine(opts)
+		return auth.NewRBAC(delegate, engine, rolesClaim), nil
+
+	case auth.NameSession:
+		ttl := parseDuration(opts["ttl"])
+		if ttl == 0 {
+			ttl = 30 * time.Minute
+		}
+		maxSessions := int64(10000)
+		if msRaw := opts["max_sessions"]; msRaw != "" {
+			if parsed, err := fmt.Sscanf(msRaw, "%d", &maxSessions); err == nil && parsed == 1 {
+			}
+		}
+		return auth.NewSession(auth.SessionOptions{
+			TTL:         ttl,
+			MaxSessions: maxSessions,
+			CookieName:  opts["cookie_name"],
+			HeaderName:  opts["header_name"],
+		})
+
 	default:
 		return nil, fmt.Errorf("unknown auth type: %s", ac.Type)
 	}
+}
+
+func buildRBACEngine(opts map[string]string) *auth.RBACEngine {
+	engine := auth.NewRBACEngine()
+
+	for k, v := range opts {
+		if !strings.HasPrefix(k, "perm_") {
+			continue
+		}
+		permParts := strings.SplitN(v, ":", 3)
+		perm := auth.Permission{}
+		switch len(permParts) {
+		case 3:
+			perm.Path = permParts[0]
+			perm.Roles = strings.Split(permParts[1], ",")
+			perm.Methods = strings.Split(permParts[2], ",")
+		case 2:
+			perm.Path = permParts[0]
+			perm.Roles = strings.Split(permParts[1], ",")
+		case 1:
+			perm.Path = permParts[0]
+		}
+		if perm.Path != "" {
+			engine.AddPermission(perm)
+		}
+	}
+
+	return engine
+}
+
+func parseDuration(s string) time.Duration {
+	if s == "" {
+		return 0
+	}
+	d, err := time.ParseDuration(s)
+	if err != nil {
+		return 0
+	}
+	return d
 }

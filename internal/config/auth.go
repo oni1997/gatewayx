@@ -27,3 +27,12 @@ func (ac *AuthConfig) APIKeyOptions() map[string]string {
 	}
 	return opts
 }
+
+func (ac *AuthConfig) AllOptions() map[string]string {
+	opts := make(map[string]string)
+	for k, v := range ac.Options {
+		val := os.ExpandEnv(v)
+		opts[k] = val
+	}
+	return opts
+}
