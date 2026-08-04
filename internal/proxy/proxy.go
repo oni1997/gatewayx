@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/gatewayx/gatewayx/internal/auth"
 	"github.com/gatewayx/gatewayx/internal/config"
 	"github.com/gatewayx/gatewayx/pkg/loadbalancer"
 )
@@ -88,6 +89,15 @@ func (rp *ReverseProxy) addRoute(routeCfg config.RouteConfig) error {
 
 	var handler http.Handler = proxy
 	handler = withTimeout(handler, routeCfg.Timeout)
+
+	if routeCfg.Authentication != nil {
+		authenticator, err := buildAuthenticator(routeCfg.Authentication)
+		if err != nil {
+			return fmt.Errorf("failed to build authenticator for route %s: %w", routeCfg.Name, err)
+		}
+		handler = auth.Middleware(authenticator)(handler)
+	}
+
 	handler = withLogger(rp.logger, routeCfg.Name)(handler)
 
 	rp.mu.Lock()
@@ -195,4 +205,43 @@ type statusWriter struct {
 func (sw *statusWriter) WriteHeader(code int) {
 	sw.status = code
 	sw.ResponseWriter.WriteHeader(code)
+}
+
+func buildAuthenticator(ac *config.AuthConfig) (auth.Authenticator, error) {
+	switch ac.Type {
+	case auth.NameJWT:
+		opts := ac.JWTOptions()
+		algo := opts["algorithm"]
+		secret := opts["secret"]
+		secretFile := opts["secret_file"]
+		publicKeyFile := opts["public_key_file"]
+
+		return auth.NewJWT(auth.JWTOptions{
+			Secret:        secret,
+			SecretFile:    secretFile,
+			PublicKeyFile: publicKeyFile,
+			Algorithm:     algo,
+		})
+
+	case auth.NameAPIKey:
+		opts := ac.APIKeyOptions()
+		keysFile := opts["keys_file"]
+		headerName := opts["header"]
+
+		inlineKeys := make(map[string]string)
+		for k, v := range opts {
+			if k != "keys_file" && k != "header" && k != "type" {
+				inlineKeys[k] = v
+			}
+		}
+
+		return auth.NewAPIKey(auth.APIKeyOptions{
+			Keys:       inlineKeys,
+			KeysFile:   keysFile,
+			HeaderName: headerName,
+		})
+
+	default:
+		return nil, fmt.Errorf("unknown auth type: %s", ac.Type)
+	}
 }
