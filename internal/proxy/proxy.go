@@ -13,6 +13,7 @@ import (
 
 	"github.com/oni1997/gatewayx/internal/auth"
 	"github.com/oni1997/gatewayx/internal/config"
+	"github.com/oni1997/gatewayx/internal/ratelimit"
 	"github.com/oni1997/gatewayx/pkg/loadbalancer"
 )
 
@@ -97,6 +98,23 @@ func (rp *ReverseProxy) addRoute(routeCfg config.RouteConfig) error {
 			return fmt.Errorf("failed to build authenticator for route %s: %w", routeCfg.Name, err)
 		}
 		handler = auth.Middleware(authenticator)(handler)
+	}
+
+	if routeCfg.RateLimit != nil {
+		rlCfg := ratelimit.Config{
+			Rate:        routeCfg.RateLimit.Rate,
+			Burst:       routeCfg.RateLimit.Burst,
+			Strategy:    routeCfg.RateLimit.Strategy,
+			PerUser:     routeCfg.RateLimit.PerUser,
+			PerIP:       routeCfg.RateLimit.PerIP,
+			PerKey:      routeCfg.RateLimit.PerKey,
+			RedisAddr:   routeCfg.RateLimit.RedisAddr,
+			RedisPrefix: routeCfg.RateLimit.RedisPrefix,
+			RouteName:   routeCfg.Name,
+		}
+		rlStore := buildRateLimitStore(rlCfg)
+		rlMw := ratelimit.NewMiddleware(rlStore, rlCfg)
+		handler = rlMw.Handler(handler)
 	}
 
 	handler = withLogger(rp.logger, routeCfg.Name)(handler)
@@ -342,4 +360,11 @@ func parseDuration(s string) time.Duration {
 		return 0
 	}
 	return d
+}
+
+func buildRateLimitStore(cfg ratelimit.Config) ratelimit.Store {
+	if cfg.RedisAddr != "" {
+		return ratelimit.NewMemoryStore(cfg)
+	}
+	return ratelimit.NewMemoryStore(cfg)
 }

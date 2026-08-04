@@ -61,9 +61,14 @@ type AuthConfig struct {
 }
 
 type RateLimitConfig struct {
-	Rate     float64 `mapstructure:"rate"`
-	Burst    int     `mapstructure:"burst"`
-	Strategy string  `mapstructure:"strategy"`
+	Rate        float64 `mapstructure:"rate"`
+	Burst       int     `mapstructure:"burst"`
+	Strategy    string  `mapstructure:"strategy"`
+	PerUser     bool    `mapstructure:"per_user"`
+	PerIP       bool    `mapstructure:"per_ip"`
+	PerKey      bool    `mapstructure:"per_key"`
+	RedisAddr   string  `mapstructure:"redis_addr"`
+	RedisPrefix string  `mapstructure:"redis_prefix"`
 }
 
 type LoggingConfig struct {
