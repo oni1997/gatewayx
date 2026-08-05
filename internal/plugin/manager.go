@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"sync"
 
 	sdkplugin "github.com/oni1997/gatewayx/sdk/plugin"
 )
@@ -12,7 +11,6 @@ import (
 type Manager struct {
 	host   *Host
 	events *sdkplugin.Events
-	mu     sync.RWMutex
 }
 
 func NewManager(host *Host, events *sdkplugin.Events) *Manager {

@@ -15,9 +15,9 @@ type Store interface {
 }
 
 type Middleware struct {
-	store       Store
-	config      Config
-	extractors  []KeyExtractor
+	store      Store
+	config     Config
+	extractors []KeyExtractor
 }
 
 func NewMiddleware(store Store, cfg Config) *Middleware {
@@ -78,7 +78,7 @@ func (rm *Middleware) Handler(next http.Handler) http.Handler {
 				w.Header().Set("Retry-After", "1")
 				w.Header().Set("X-RateLimit-Limit", fmt.Sprintf("%.0f", rm.config.Rate))
 				w.WriteHeader(http.StatusTooManyRequests)
-				w.Write([]byte(`{"error":"rate_limit_exceeded","message":"too many requests"}`))
+				_, _ = w.Write([]byte(`{"error":"rate_limit_exceeded","message":"too many requests"}`))
 				return
 			}
 		}

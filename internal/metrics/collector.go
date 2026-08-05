@@ -17,15 +17,15 @@ type Collector struct {
 }
 
 type LatencyStats struct {
-	mu          sync.Mutex
-	Count       int64
-	TotalMs     float64
-	MinMs       float64
-	MaxMs       float64
-	LastMs      float64
-	P50Ms       float64
-	P95Ms       float64
-	P99Ms       float64
+	mu              sync.Mutex
+	Count           int64
+	TotalMs         float64
+	MinMs           float64
+	MaxMs           float64
+	LastMs          float64
+	P50Ms           float64
+	P95Ms           float64
+	P99Ms           float64
 	recentDurations []float64
 }
 
@@ -125,12 +125,12 @@ func (c *Collector) Snapshot() CollectorSnapshot {
 			avgMs = stats.TotalMs / float64(stats.Count)
 		}
 		snapshot.Routes = append(snapshot.Routes, RouteSnapshot{
-			Name:    route,
-			Count:   stats.Count,
-			AvgMs:   avgMs,
-			MinMs:   stats.MinMs,
-			MaxMs:   stats.MaxMs,
-			LastMs:  stats.LastMs,
+			Name:   route,
+			Count:  stats.Count,
+			AvgMs:  avgMs,
+			MinMs:  stats.MinMs,
+			MaxMs:  stats.MaxMs,
+			LastMs: stats.LastMs,
 		})
 		stats.mu.Unlock()
 		return true
@@ -149,10 +149,10 @@ type CollectorSnapshot struct {
 }
 
 type RouteSnapshot struct {
-	Name  string  `json:"name"`
-	Count int64   `json:"count"`
-	AvgMs float64 `json:"avg_ms"`
-	MinMs float64 `json:"min_ms"`
-	MaxMs float64 `json:"max_ms"`
+	Name   string  `json:"name"`
+	Count  int64   `json:"count"`
+	AvgMs  float64 `json:"avg_ms"`
+	MinMs  float64 `json:"min_ms"`
+	MaxMs  float64 `json:"max_ms"`
 	LastMs float64 `json:"last_ms"`
 }

@@ -67,6 +67,6 @@ func (b *Buffer) Handler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		entries := b.Snapshot()
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(entries)
+		_ = json.NewEncoder(w).Encode(entries)
 	})
 }

@@ -15,7 +15,6 @@ const NameJWT = "jwt"
 type JWTAuthenticator struct {
 	secretKey     []byte
 	publicKey     any
-	privateKey    any
 	algorithm     string
 	claimsHeaders map[string]string
 }

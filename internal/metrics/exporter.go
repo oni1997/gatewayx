@@ -15,7 +15,7 @@ func Exporter(collector *Collector) http.Handler {
 		accept := r.Header.Get("Accept")
 		if accept == "application/json" {
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(snapshot)
+			_ = json.NewEncoder(w).Encode(snapshot)
 			return
 		}
 

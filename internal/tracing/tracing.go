@@ -82,7 +82,7 @@ func (t *Tracer) extractOrGenerate(r *http.Request, header string) string {
 
 func generateID(length int) string {
 	b := make([]byte, length)
-	rand.Read(b)
+	_, _ = rand.Read(b)
 	return hex.EncodeToString(b)
 }
 

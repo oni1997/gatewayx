@@ -75,7 +75,7 @@ func TestJWT_SecretFile(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer os.Remove(f.Name())
-	f.WriteString("file-secret-key")
+	_, _ = f.WriteString("file-secret-key")
 	f.Close()
 
 	ja, err := NewJWT(JWTOptions{SecretFile: f.Name()})
@@ -155,7 +155,7 @@ func TestAPIKey_KeysFile(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer os.Remove(f.Name())
-	f.WriteString("file-key-xyz: file-user\n")
+	_, _ = f.WriteString("file-key-xyz: file-user\n")
 	f.Close()
 
 	ak, err := NewAPIKey(APIKeyOptions{KeysFile: f.Name()})

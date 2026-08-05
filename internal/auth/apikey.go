@@ -92,7 +92,7 @@ func (ak *APIKeyAuthenticator) Authenticate(r *http.Request) (Claims, error) {
 	}
 
 	return Claims{
-		"sub":    owner,
+		"sub":     owner,
 		"api_key": key,
 	}, nil
 }

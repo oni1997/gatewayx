@@ -66,7 +66,7 @@ func TestMetricsMiddleware(t *testing.T) {
 	c := NewCollector()
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("hello"))
+		_, _ = w.Write([]byte("hello"))
 	})
 	wrapped := Middleware(c)(handler)
 

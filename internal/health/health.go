@@ -16,10 +16,9 @@ const (
 )
 
 type Checker struct {
-	mu       sync.RWMutex
-	checks   map[string]CheckFunc
-	status   Status
-	started  time.Time
+	mu      sync.RWMutex
+	checks  map[string]CheckFunc
+	started time.Time
 }
 
 type CheckFunc func() error
@@ -75,6 +74,6 @@ func (c *Checker) Handler() http.HandlerFunc {
 		if status == StatusUnhealthy {
 			w.WriteHeader(http.StatusServiceUnavailable)
 		}
-		json.NewEncoder(w).Encode(report)
+	_ = json.NewEncoder(w).Encode(report)
 	}
 }

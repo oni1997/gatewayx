@@ -12,13 +12,13 @@ import (
 const NameSession = "session"
 
 type SessionAuthenticator struct {
-	store    *SessionStore
-	config   SessionConfig
+	store  *SessionStore
+	config SessionConfig
 }
 
 type SessionConfig struct {
-	TTL           time.Duration
-	MaxSessions   int64
+	TTL             time.Duration
+	MaxSessions     int64
 	CleanupInterval time.Duration
 }
 
@@ -45,11 +45,11 @@ func (s *Session) Touch() {
 }
 
 type SessionStore struct {
-	sessions      sync.Map
-	maxSessions   int64
-	count         atomic.Int64
-	ttl           time.Duration
-	stopCleanup   chan struct{}
+	sessions    sync.Map
+	maxSessions int64
+	count       atomic.Int64
+	ttl         time.Duration
+	stopCleanup chan struct{}
 }
 
 func NewSessionStore(maxSessions int64, ttl time.Duration) *SessionStore {
@@ -143,10 +143,10 @@ func generateSessionID(userID string) string {
 }
 
 type SessionOptions struct {
-	TTL           time.Duration
-	MaxSessions   int64
-	CookieName    string
-	HeaderName    string
+	TTL         time.Duration
+	MaxSessions int64
+	CookieName  string
+	HeaderName  string
 }
 
 func NewSession(opts SessionOptions) (*SessionAuthenticator, error) {
@@ -162,8 +162,8 @@ func NewSession(opts SessionOptions) (*SessionAuthenticator, error) {
 	sa := &SessionAuthenticator{
 		store: NewSessionStore(maxSessions, ttl),
 		config: SessionConfig{
-			TTL:           ttl,
-			MaxSessions:   maxSessions,
+			TTL:             ttl,
+			MaxSessions:     maxSessions,
 			CleanupInterval: ttl / 2,
 		},
 	}

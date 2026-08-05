@@ -18,11 +18,11 @@ import (
 )
 
 type ReverseProxy struct {
-	config    *config.Config
-	logger    *slog.Logger
-	server    *http.Server
-	routes    map[string]*routeProxy
-	mu        sync.RWMutex
+	config *config.Config
+	logger *slog.Logger
+	server *http.Server
+	routes map[string]*routeProxy
+	mu     sync.RWMutex
 }
 
 type routeProxy struct {
@@ -308,8 +308,7 @@ func buildAuthenticator(ac *config.AuthConfig) (auth.Authenticator, error) {
 		}
 		maxSessions := int64(10000)
 		if msRaw := opts["max_sessions"]; msRaw != "" {
-			if parsed, err := fmt.Sscanf(msRaw, "%d", &maxSessions); err == nil && parsed == 1 {
-			}
+			_, _ = fmt.Sscanf(msRaw, "%d", &maxSessions)
 		}
 		return auth.NewSession(auth.SessionOptions{
 			TTL:         ttl,

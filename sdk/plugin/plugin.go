@@ -18,12 +18,12 @@ type Plugin interface {
 type LifecycleState string
 
 const (
-	StateUnloaded  LifecycleState = "unloaded"
-	StateLoaded    LifecycleState = "loaded"
+	StateUnloaded    LifecycleState = "unloaded"
+	StateLoaded      LifecycleState = "loaded"
 	StateInitialized LifecycleState = "initialized"
-	StateRunning   LifecycleState = "running"
-	StateStopped   LifecycleState = "stopped"
-	StateError     LifecycleState = "error"
+	StateRunning     LifecycleState = "running"
+	StateStopped     LifecycleState = "stopped"
+	StateError       LifecycleState = "error"
 )
 
 type PluginInfo struct {

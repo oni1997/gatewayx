@@ -49,12 +49,12 @@ func TestBuffer_Overflow(t *testing.T) {
 func TestBuffer_Handler(t *testing.T) {
 	b := NewBuffer(10)
 	b.Push(Entry{
-		Timestamp:  time.Now(),
-		TraceID:    "abc123",
-		Method:     "GET",
-		Path:       "/api/test",
-		Status:     200,
-		Duration:   5 * time.Millisecond,
+		Timestamp: time.Now(),
+		TraceID:   "abc123",
+		Method:    "GET",
+		Path:      "/api/test",
+		Status:    200,
+		Duration:  5 * time.Millisecond,
 	})
 
 	req := httptest.NewRequest("GET", "/history", nil)

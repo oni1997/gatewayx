@@ -109,8 +109,8 @@ func containsStringFold(slice []string, item string) bool {
 }
 
 type RBACAuthenticator struct {
-	delegate Authenticator
-	engine   *RBACEngine
+	delegate   Authenticator
+	engine     *RBACEngine
 	rolesClaim string
 }
 
@@ -180,7 +180,7 @@ func RBACMiddleware(ra *RBACAuthenticator) func(http.Handler) http.Handler {
 			if !ok {
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusUnauthorized)
-				w.Write([]byte(`{"error":"unauthorized","message":"no auth claims in context"}`))
+				_, _ = w.Write([]byte(`{"error":"unauthorized","message":"no auth claims in context"}`))
 				return
 			}
 
@@ -188,7 +188,7 @@ func RBACMiddleware(ra *RBACAuthenticator) func(http.Handler) http.Handler {
 			if !ok {
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusForbidden)
-				w.Write([]byte(`{"error":"forbidden","message":"no roles in request context"}`))
+				_, _ = w.Write([]byte(`{"error":"forbidden","message":"no roles in request context"}`))
 				return
 			}
 
@@ -210,7 +210,7 @@ func RBACMiddleware(ra *RBACAuthenticator) func(http.Handler) http.Handler {
 			if !ra.engine.CheckPermission(userRoles, r.Method, r.URL.Path) {
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusForbidden)
-				w.Write([]byte(`{"error":"forbidden","message":"insufficient permissions"}`))
+				_, _ = w.Write([]byte(`{"error":"forbidden","message":"insufficient permissions"}`))
 				return
 			}
 

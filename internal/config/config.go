@@ -30,29 +30,29 @@ type ServerConfig struct {
 }
 
 type RouteConfig struct {
-	Name          string            `mapstructure:"name"`
-	ListenPath    string            `mapstructure:"listen_path"`
-	UpstreamURLs  []string          `mapstructure:"upstream_urls"`
-	Methods       []string          `mapstructure:"methods"`
-	Hosts         []string          `mapstructure:"hosts"`
-	StripPath     bool              `mapstructure:"strip_path"`
-	PreserveHost  bool              `mapstructure:"preserve_host"`
-	Headers       map[string]string `mapstructure:"headers"`
-	Timeout       time.Duration     `mapstructure:"timeout"`
-	RetryCount    int               `mapstructure:"retry_count"`
-	LoadBalancing string            `mapstructure:"load_balancing"`
-	HealthCheck   *HealthCheckConfig `mapstructure:"health_check"`
-	Authentication *AuthConfig      `mapstructure:"authentication"`
-	RateLimit     *RateLimitConfig  `mapstructure:"rate_limit"`
-	Compression   bool              `mapstructure:"compression"`
+	Name           string             `mapstructure:"name"`
+	ListenPath     string             `mapstructure:"listen_path"`
+	UpstreamURLs   []string           `mapstructure:"upstream_urls"`
+	Methods        []string           `mapstructure:"methods"`
+	Hosts          []string           `mapstructure:"hosts"`
+	StripPath      bool               `mapstructure:"strip_path"`
+	PreserveHost   bool               `mapstructure:"preserve_host"`
+	Headers        map[string]string  `mapstructure:"headers"`
+	Timeout        time.Duration      `mapstructure:"timeout"`
+	RetryCount     int                `mapstructure:"retry_count"`
+	LoadBalancing  string             `mapstructure:"load_balancing"`
+	HealthCheck    *HealthCheckConfig `mapstructure:"health_check"`
+	Authentication *AuthConfig        `mapstructure:"authentication"`
+	RateLimit      *RateLimitConfig   `mapstructure:"rate_limit"`
+	Compression    bool               `mapstructure:"compression"`
 }
 
 type HealthCheckConfig struct {
-	Path     string        `mapstructure:"path"`
-	Interval time.Duration `mapstructure:"interval"`
-	Timeout  time.Duration `mapstructure:"timeout"`
-	Healthy  int           `mapstructure:"healthy"`
-	Unhealthy int          `mapstructure:"unhealthy"`
+	Path      string        `mapstructure:"path"`
+	Interval  time.Duration `mapstructure:"interval"`
+	Timeout   time.Duration `mapstructure:"timeout"`
+	Healthy   int           `mapstructure:"healthy"`
+	Unhealthy int           `mapstructure:"unhealthy"`
 }
 
 type AuthConfig struct {
@@ -79,11 +79,11 @@ type LoggingConfig struct {
 }
 
 type MetricsConfig struct {
-	Enabled  bool   `mapstructure:"enabled"`
-	Port     int    `mapstructure:"port"`
-	Path     string `mapstructure:"path"`
-	Tracing  bool   `mapstructure:"tracing"`
-	History  int    `mapstructure:"history"`
+	Enabled bool   `mapstructure:"enabled"`
+	Port    int    `mapstructure:"port"`
+	Path    string `mapstructure:"path"`
+	Tracing bool   `mapstructure:"tracing"`
+	History int    `mapstructure:"history"`
 }
 
 type PluginsConfig struct {
@@ -92,11 +92,11 @@ type PluginsConfig struct {
 }
 
 type TLSConfig struct {
-	Enabled  bool   `mapstructure:"enabled"`
-	CertFile string `mapstructure:"cert_file"`
-	KeyFile  string `mapstructure:"key_file"`
-	MinVersion string `mapstructure:"min_version"`
-	AutoCert  bool   `mapstructure:"auto_cert"`
+	Enabled     bool   `mapstructure:"enabled"`
+	CertFile    string `mapstructure:"cert_file"`
+	KeyFile     string `mapstructure:"key_file"`
+	MinVersion  string `mapstructure:"min_version"`
+	AutoCert    bool   `mapstructure:"auto_cert"`
 	AutoCertDir string `mapstructure:"auto_cert_dir"`
 }
 
@@ -128,11 +128,11 @@ func DefaultConfig() *Config {
 			Output: "stdout",
 		},
 		Metrics: MetricsConfig{
-			Enabled:  true,
-			Port:     9090,
-			Path:     "/metrics",
-			Tracing:  false,
-			History:  1000,
+			Enabled: true,
+			Port:    9090,
+			Path:    "/metrics",
+			Tracing: false,
+			History: 1000,
 		},
 		Health: HealthConfig{
 			Enabled: true,

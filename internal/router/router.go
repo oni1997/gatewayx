@@ -6,11 +6,11 @@ import (
 )
 
 type Route struct {
-	Methods    []string
-	Paths      []string
-	Hosts      []string
-	Handler    http.Handler
-	StripPath  string
+	Methods   []string
+	Paths     []string
+	Hosts     []string
+	Handler   http.Handler
+	StripPath string
 }
 
 type Router struct {

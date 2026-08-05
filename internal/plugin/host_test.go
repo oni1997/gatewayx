@@ -63,7 +63,7 @@ func TestHost_DuplicateLoad(t *testing.T) {
 	host := NewHost(sdkplugin.NewEvents())
 	p := &testPlugin{name: "dup", version: "1.0"}
 
-	host.Load(p, nil)
+	_ = host.Load(p, nil)
 	err := host.Load(p, nil)
 	if err == nil {
 		t.Error("expected error on duplicate load")
@@ -76,8 +76,8 @@ func TestRegistry_RegisterAndList(t *testing.T) {
 	p1 := &testPlugin{name: "p1", version: "1.0"}
 	p2 := &testPlugin{name: "p2", version: "2.0"}
 
-	reg.Register(p1)
-	reg.Register(p2)
+	_ = reg.Register(p1)
+	_ = reg.Register(p2)
 
 	if reg.Count() != 2 {
 		t.Errorf("expected 2 plugins, got %d", reg.Count())
@@ -91,8 +91,8 @@ func TestRegistry_RegisterAndList(t *testing.T) {
 
 func TestRegistry_Unregister(t *testing.T) {
 	reg := sdkplugin.NewRegistry(sdkplugin.NewEvents())
-	reg.Register(&testPlugin{name: "p1", version: "1.0"})
-	reg.Register(&testPlugin{name: "p2", version: "1.0"})
+	_ = reg.Register(&testPlugin{name: "p1", version: "1.0"})
+	_ = reg.Register(&testPlugin{name: "p2", version: "1.0"})
 
 	reg.Unregister("p1")
 	if reg.Count() != 1 {
@@ -114,7 +114,7 @@ func TestEvents_RegisterAndTrigger(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	ctx, err := events.Trigger(sdkplugin.HookOnStart, ctx, nil)
+	_, err := events.Trigger(sdkplugin.HookOnStart, ctx, nil)
 	if err != nil {
 		t.Fatalf("trigger failed: %v", err)
 	}
@@ -164,8 +164,8 @@ func TestPluginConfig_LoadConfig(t *testing.T) {
 func TestScanDir(t *testing.T) {
 	dir := t.TempDir()
 
-	os.WriteFile(dir+"/plugin.so", []byte("mock"), 0644)
-	os.WriteFile(dir+"/not-a-plugin.txt", []byte("text"), 0644)
+	_ = os.WriteFile(dir+"/plugin.so", []byte("mock"), 0644)
+	_ = os.WriteFile(dir+"/not-a-plugin.txt", []byte("text"), 0644)
 
 	files, err := sdkplugin.ScanDir(dir)
 	if err != nil {
@@ -181,7 +181,7 @@ func TestManager_MiddlewarePasses(t *testing.T) {
 	events := sdkplugin.NewEvents()
 	mgr := NewManager(host, events)
 
-	host.Load(&testPlugin{name: "ok-plugin", version: "1.0"}, nil)
+	_ = host.Load(&testPlugin{name: "ok-plugin", version: "1.0"}, nil)
 
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -204,7 +204,7 @@ func TestManager_MiddlewareBlocksError(t *testing.T) {
 	events := sdkplugin.NewEvents()
 	mgr := NewManager(host, events)
 
-	host.Load(&testPlugin{name: "err-plugin", version: "1.0", reqErr: context.DeadlineExceeded}, nil)
+	_ = host.Load(&testPlugin{name: "err-plugin", version: "1.0", reqErr: context.DeadlineExceeded}, nil)
 
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		t.Error("handler should not be called")
@@ -232,6 +232,9 @@ func newResponseRecorder() *responseRecorder {
 	return &responseRecorder{headers: make(http.Header)}
 }
 
-func (r *responseRecorder) Header() http.Header         { return r.headers }
-func (r *responseRecorder) Write(b []byte) (int, error) { r.body = append(r.body, b...); return len(b), nil }
-func (r *responseRecorder) WriteHeader(code int)        { r.status = code }
+func (r *responseRecorder) Header() http.Header { return r.headers }
+func (r *responseRecorder) Write(b []byte) (int, error) {
+	r.body = append(r.body, b...)
+	return len(b), nil
+}
+func (r *responseRecorder) WriteHeader(code int) { r.status = code }

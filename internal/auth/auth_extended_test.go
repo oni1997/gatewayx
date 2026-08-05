@@ -100,9 +100,9 @@ func TestBasicAuth_HtpasswdFile(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer os.Remove(f.Name())
-	f.WriteString("fileuser:filepass\n")
-	f.WriteString("# comment line\n")
-	f.WriteString("another:password123\n")
+	_, _ = f.WriteString("fileuser:filepass\n")
+	_, _ = f.WriteString("# comment line\n")
+	_, _ = f.WriteString("another:password123\n")
 	f.Close()
 
 	ba, err := NewBasic(BasicOptions{
@@ -266,7 +266,7 @@ func TestSession_MaxSessions(t *testing.T) {
 
 func TestSession_Authenticator(t *testing.T) {
 	sa, err := NewSession(SessionOptions{
-		TTL:        time.Hour,
+		TTL:         time.Hour,
 		MaxSessions: 100,
 	})
 	if err != nil {
@@ -314,8 +314,8 @@ func TestRBAC_BasicCheck(t *testing.T) {
 		Roles:   []string{"admin"},
 	})
 	engine.AddPermission(Permission{
-		Path:    "/api/**",
-		Roles:   []string{"admin", "developer"},
+		Path:  "/api/**",
+		Roles: []string{"admin", "developer"},
 	})
 
 	tests := []struct {

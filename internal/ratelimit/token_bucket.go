@@ -6,10 +6,10 @@ import (
 )
 
 type TokenBucket struct {
-	mu       sync.Mutex
-	rate     float64
-	burst    int
-	tokens   float64
+	mu         sync.Mutex
+	rate       float64
+	burst      int
+	tokens     float64
 	lastRefill time.Time
 }
 

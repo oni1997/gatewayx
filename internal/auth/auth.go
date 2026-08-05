@@ -42,7 +42,7 @@ func Middleware(authenticator Authenticator) func(http.Handler) http.Handler {
 			if err != nil {
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusUnauthorized)
-				w.Write([]byte(`{"error":"unauthorized","message":"` + err.Error() + `"}`))
+				_, _ = w.Write([]byte(`{"error":"unauthorized","message":"` + err.Error() + `"}`))
 				return
 			}
 			ctx := WithClaims(r.Context(), claims)

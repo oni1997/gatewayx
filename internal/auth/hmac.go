@@ -15,10 +15,10 @@ import (
 const NameHMAC = "hmac"
 
 type HMACAuthenticator struct {
-	secret      []byte
-	algorithm   string
-	headerName  string
-	clockSkew   time.Duration
+	secret     []byte
+	algorithm  string
+	headerName string
+	clockSkew  time.Duration
 }
 
 type HMACOptions struct {
@@ -36,7 +36,7 @@ func NewHMAC(opts HMACOptions) (*HMACAuthenticator, error) {
 		clockSkew:  opts.ClockSkew,
 	}
 
-	if ha.secret == nil || len(ha.secret) == 0 {
+	if len(ha.secret) == 0 {
 		return nil, fmt.Errorf("hmac: secret is required")
 	}
 	if ha.algorithm == "" {
@@ -104,10 +104,10 @@ func (ha *HMACAuthenticator) Authenticate(r *http.Request) (Claims, error) {
 	}
 
 	return Claims{
-		"sub":      keyID,
-		"type":     "hmac",
-		"key_id":   keyID,
-		"method":   ha.algorithm,
+		"sub":    keyID,
+		"type":   "hmac",
+		"key_id": keyID,
+		"method": ha.algorithm,
 	}, nil
 }
 

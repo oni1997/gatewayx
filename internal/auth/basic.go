@@ -15,9 +15,9 @@ import (
 const NameBasic = "basic"
 
 type BasicAuthenticator struct {
-	users  map[string]string
-	realm  string
-	mu     sync.RWMutex
+	users map[string]string
+	realm string
+	mu    sync.RWMutex
 }
 
 type BasicOptions struct {
@@ -131,5 +131,5 @@ func (rw *responseWriter) Header() http.Header {
 	return rw.headers
 }
 
-func (rw *responseWriter) Write([]byte) (int, error)     { return 0, nil }
-func (rw *responseWriter) WriteHeader(int)                {}
+func (rw *responseWriter) Write([]byte) (int, error) { return 0, nil }
+func (rw *responseWriter) WriteHeader(int)           {}
