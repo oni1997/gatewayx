@@ -1,30 +1,46 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface APIKey {
   id: string;
   name: string;
-  key: string;
   owner: string;
-  created: string;
-  lastUsed: string;
+  prefix?: string;
+  key?: string;
+  created_at: string;
+  last_used?: string;
 }
 
-const mockKeys: APIKey[] = [
-  { id: '1', name: 'Production API', key: 'sk-prod-' + 'x'.repeat(24), owner: 'admin', created: '2026-06-15', lastUsed: '2026-08-04' },
-  { id: '2', name: 'Staging API', key: 'sk-stag-' + 'x'.repeat(24), owner: 'dev-team', created: '2026-07-01', lastUsed: '2026-08-03' },
-  { id: '3', name: 'Mobile App', key: 'sk-mob-' + 'x'.repeat(24), owner: 'mobile', created: '2026-07-20', lastUsed: '2026-08-04' },
-];
-
 export default function APIKeys() {
-  const [keys] = useState<APIKey[]>(mockKeys);
+  const [keys, setKeys] = useState<APIKey[]>([]);
   const [showNew, setShowNew] = useState(false);
   const [newKey, setNewKey] = useState({ name: '', owner: '' });
   const [generated, setGenerated] = useState('');
 
+  useEffect(() => {
+    fetch('/api/keys')
+      .then((r) => r.json())
+      .then(setKeys)
+      .catch(() => {});
+  }, []);
+
   const generate = () => {
-    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-    let key = 'sk-' + Array.from({ length: 32 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-    setGenerated(key);
+    fetch('/api/keys', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newKey),
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        setGenerated(data.key);
+        setKeys([...keys, data]);
+      })
+      .catch(() => {});
+  };
+
+  const revoke = (id: string) => {
+    fetch(`/api/keys/${id}`, { method: 'DELETE' })
+      .then(() => setKeys(keys.filter((k) => k.id !== id)))
+      .catch(() => {});
   };
 
   return (
@@ -65,7 +81,7 @@ export default function APIKeys() {
             </div>
           </div>
           {!generated ? (
-            <button onClick={generate} className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-sm">
+            <button onClick={generate} className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-sm" disabled={!newKey.name || !newKey.owner}>
               Generate
             </button>
           ) : (
@@ -85,7 +101,6 @@ export default function APIKeys() {
               <th className="text-left p-3">Owner</th>
               <th className="text-left p-3">Key</th>
               <th className="text-right p-3">Created</th>
-              <th className="text-right p-3">Last Used</th>
               <th className="text-right p-3">Actions</th>
             </tr>
           </thead>
@@ -95,15 +110,17 @@ export default function APIKeys() {
                 <td className="p-3 font-medium">{key.name}</td>
                 <td className="p-3">{key.owner}</td>
                 <td className="p-3 font-mono text-xs text-gray-500">
-                  {key.key.slice(0, 12)}...
+                  {key.prefix || (key.key ? key.key.slice(0, 12) + '...' : '...')}
                 </td>
-                <td className="p-3 text-right text-xs">{key.created}</td>
-                <td className="p-3 text-right text-xs">{key.lastUsed}</td>
+                <td className="p-3 text-right text-xs">{new Date(key.created_at).toLocaleDateString()}</td>
                 <td className="p-3 text-right">
-                  <button className="text-red-400 hover:text-red-300 text-xs">Revoke</button>
+                  <button onClick={() => revoke(key.id)} className="text-red-400 hover:text-red-300 text-xs">Revoke</button>
                 </td>
               </tr>
             ))}
+            {keys.length === 0 && (
+              <tr><td colSpan={5} className="p-3 text-center text-gray-500">No API keys yet</td></tr>
+            )}
           </tbody>
         </table>
       </div>
