@@ -52,3 +52,7 @@ temp/
 # Docker
 *.tar
 create.md
+
+# Dashboard
+apps/dashboard/node_modules/
+apps/dashboard/dist/

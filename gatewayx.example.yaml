@@ -39,6 +39,8 @@ metrics:
   enabled: true
   port: 9090
   path: "/metrics"
+  tracing: false
+  history: 1000
 
 health:
   enabled: true

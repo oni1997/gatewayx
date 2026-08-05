@@ -79,9 +79,11 @@ type LoggingConfig struct {
 }
 
 type MetricsConfig struct {
-	Enabled bool   `mapstructure:"enabled"`
-	Port    int    `mapstructure:"port"`
-	Path    string `mapstructure:"path"`
+	Enabled  bool   `mapstructure:"enabled"`
+	Port     int    `mapstructure:"port"`
+	Path     string `mapstructure:"path"`
+	Tracing  bool   `mapstructure:"tracing"`
+	History  int    `mapstructure:"history"`
 }
 
 type PluginsConfig struct {
@@ -126,9 +128,11 @@ func DefaultConfig() *Config {
 			Output: "stdout",
 		},
 		Metrics: MetricsConfig{
-			Enabled: true,
-			Port:    9090,
-			Path:    "/metrics",
+			Enabled:  true,
+			Port:     9090,
+			Path:     "/metrics",
+			Tracing:  false,
+			History:  1000,
 		},
 		Health: HealthConfig{
 			Enabled: true,

@@ -10,9 +10,12 @@ import (
 
 	"github.com/oni1997/gatewayx/internal/config"
 	"github.com/oni1997/gatewayx/internal/health"
+	"github.com/oni1997/gatewayx/internal/history"
 	"github.com/oni1997/gatewayx/internal/logger"
+	"github.com/oni1997/gatewayx/internal/metrics"
 	"github.com/oni1997/gatewayx/internal/middleware"
 	"github.com/oni1997/gatewayx/internal/proxy"
+	"github.com/oni1997/gatewayx/internal/tracing"
 )
 
 var (
@@ -36,6 +39,10 @@ func main() {
 	log := logger.New(cfg.Logging)
 	log.Info("gatewayx starting", "version", version, "commit", commit, "build_date", buildDate)
 
+	collector := metrics.NewCollector()
+	histBuf := history.NewBuffer(max(cfg.Metrics.History, 1000))
+	tracer := tracing.New(cfg.Metrics.Tracing, histBuf)
+
 	rp, err := proxy.New(cfg, log)
 	if err != nil {
 		log.Error("failed to create proxy", "error", err)
@@ -52,12 +59,16 @@ func main() {
 	var handler http.Handler = mux
 	handler = middleware.Recovery(handler)
 	handler = middleware.MaxBodySize(cfg.Security.MaxBodySize)(handler)
+	handler = metrics.Middleware(collector)(handler)
+	handler = tracer.Middleware(handler)
 
 	if cfg.Metrics.Enabled {
 		log.Info("metrics enabled", "port", cfg.Metrics.Port)
 		go func() {
 			metricsMux := http.NewServeMux()
-			metricsMux.Handle(cfg.Metrics.Path, metricsHandler())
+			metricsMux.Handle(cfg.Metrics.Path, metrics.Exporter(collector))
+			metricsMux.Handle("/history", histBuf.Handler())
+			metricsMux.Handle("/health", checker.Handler())
 			metricsAddr := fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Metrics.Port)
 			if err := http.ListenAndServe(metricsAddr, metricsMux); err != nil {
 				log.Error("metrics server error", "error", err)
@@ -84,7 +95,7 @@ func main() {
 		if err := server.Shutdown(shutdownCtx); err != nil {
 			log.Error("graceful shutdown failed", "error", err)
 		}
-		}()
+	}()
 
 	log.Info("gateway listening", "addr", server.Addr)
 
@@ -101,11 +112,4 @@ func main() {
 	}
 
 	log.Info("gateway stopped")
-}
-
-func metricsHandler() http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "text/plain; version=0.0.4")
-		w.Write([]byte("# GatewayX Metrics\n"))
-	})
 }
