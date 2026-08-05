@@ -38,7 +38,7 @@ export default function Layout() {
           ))}
         </nav>
         <div className="mt-auto pt-4 border-t border-dark-border text-xs text-gray-500">
-          v0.3.0
+          v0.3.1
         </div>
       </aside>
       <main className="flex-1 overflow-auto p-6">
