@@ -1,0 +1,14 @@
+# Patterns to ignore when building packages.
+.*
+*.swp
+*.backup
+*.tmp
+*.orig
+
+# Helm dependencies
+charts/
+
+# IDE files
+.idea/
+.vscode/
+*.sublime-*

@@ -5,7 +5,10 @@ const links = [
   { to: '/services', label: 'Services', icon: '◇' },
   { to: '/metrics', label: 'Metrics', icon: '◆' },
   { to: '/history', label: 'History', icon: '◈' },
+  { to: '/api-keys', label: 'API Keys', icon: '▣' },
+  { to: '/certificates', label: 'Certs', icon: '◉' },
   { to: '/health', label: 'Health', icon: '○' },
+  { to: '/settings', label: 'Settings', icon: '◎' },
 ];
 
 export default function Layout() {

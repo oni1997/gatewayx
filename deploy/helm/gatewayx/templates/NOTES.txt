@@ -1,0 +1,22 @@
+# Notes displayed after `helm install`
+
+GatewayX has been deployed!
+
+{{- if .Values.ingress.enabled }}
+Access the gateway at:
+{{- range .Values.ingress.hosts }}
+  http{{ if $.Values.config.tls.enabled }}s{{ end }}://{{ .host }}
+{{- end }}
+{{- else }}
+Access the gateway by port-forwarding:
+  kubectl port-forward svc/{{ include "gatewayx.fullname" . }} 8080:8080
+{{- end }}
+
+Check health:
+  curl http://localhost:8080/health
+
+Metrics:
+  curl http://localhost:9090/metrics
+
+To customize routes, update the ConfigMap:
+  kubectl edit configmap {{ include "gatewayx.fullname" . }}-config
