@@ -8,6 +8,7 @@
 
 <p align="center">
   <a href="https://github.com/oni1997/gatewayx/actions/workflows/ci.yml"><img src="https://github.com/oni1997/gatewayx/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/oni1997/gatewayx/pkgs/container/gatewayx"><img src="https://img.shields.io/badge/container-ghcr-blue" alt="Container"></a>
   <a href="https://github.com/oni1997/gatewayx/blob/main/LICENSE"><img src="https://img.shields.io/github/license/oni1997/gatewayx" alt="License"></a>
   <a href="https://go.dev"><img src="https://img.shields.io/github/go-mod/go-version/oni1997/gatewayx" alt="Go Version"></a>
 </p>
@@ -52,6 +53,29 @@ cp gatewayx.example.yaml gatewayx.yaml
 
 ./bin/gatewayx
 ```
+
+## Deploy with Docker / Podman
+
+Pull the pre-built image from GitHub Container Registry and run with a single command:
+
+```bash
+# Podman
+podman pull ghcr.io/oni1997/gatewayx:latest
+podman run -d -p 8080:8080 -p 9090:9090 \
+  -v $(pwd)/gatewayx.yaml:/etc/gatewayx/gatewayx.yaml \
+  ghcr.io/oni1997/gatewayx:latest
+
+# Docker
+docker pull ghcr.io/oni1997/gatewayx:latest
+docker run -d -p 8080:8080 -p 9090:9090 \
+  -v $(pwd)/gatewayx.yaml:/etc/gatewayx/gatewayx.yaml \
+  ghcr.io/oni1997/gatewayx:latest
+```
+
+Then visit:
+- `http://localhost:8080/health` — health check
+- `http://localhost:9090/metrics` — Prometheus metrics
+- `http://localhost:9090/` — Dashboard
 
 ## Example Config
 

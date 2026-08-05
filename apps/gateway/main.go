@@ -8,6 +8,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/oni1997/gatewayx/internal/ml"
 	"github.com/oni1997/gatewayx/internal/config"
 	"github.com/oni1997/gatewayx/internal/health"
 	"github.com/oni1997/gatewayx/internal/history"
@@ -65,10 +66,16 @@ func main() {
 	if cfg.Metrics.Enabled {
 		log.Info("metrics enabled", "port", cfg.Metrics.Port)
 		go func() {
+			analysisSvc := ml.NewAnalysisService(collector, histBuf)
+
 			metricsMux := http.NewServeMux()
 			metricsMux.Handle(cfg.Metrics.Path, metrics.Exporter(collector))
 			metricsMux.Handle("/history", histBuf.Handler())
 			metricsMux.Handle("/health", checker.Handler())
+			metricsMux.Handle("/security", analysisSvc.SecurityHandler())
+			metricsMux.Handle("/bottlenecks", analysisSvc.BottlenecksHandler())
+			metricsMux.Handle("/recommendations", analysisSvc.RecommendationsHandler())
+			metricsMux.Handle("/analysis", analysisSvc.FullReportHandler())
 			metricsMux.Handle("/", dashboardHandler())
 			metricsAddr := fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Metrics.Port)
 			log.Info("dashboard available", "url", "http://"+metricsAddr)
