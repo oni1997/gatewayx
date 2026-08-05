@@ -105,4 +105,4 @@ routes:
 
 ## Reporting Vulnerabilities
 
-Please report security vulnerabilities to security@gatewayx.dev. Do not open public issues.
+Please report security vulnerabilities to dzidzaimaenza@gmail.com. Do not open public issues.
