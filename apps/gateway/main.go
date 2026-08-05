@@ -69,7 +69,9 @@ func main() {
 			metricsMux.Handle(cfg.Metrics.Path, metrics.Exporter(collector))
 			metricsMux.Handle("/history", histBuf.Handler())
 			metricsMux.Handle("/health", checker.Handler())
+			metricsMux.Handle("/", dashboardHandler())
 			metricsAddr := fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Metrics.Port)
+			log.Info("dashboard available", "url", "http://"+metricsAddr)
 			if err := http.ListenAndServe(metricsAddr, metricsMux); err != nil {
 				log.Error("metrics server error", "error", err)
 			}

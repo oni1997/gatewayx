@@ -20,6 +20,14 @@ RUN CGO_ENABLED=0 go build \
     -o /gatewayx \
     ./apps/gateway
 
+FROM node:23-alpine AS dashboard-builder
+
+WORKDIR /dashboard
+COPY apps/dashboard/package.json apps/dashboard/package-lock.json ./
+RUN npm ci
+COPY apps/dashboard/ ./
+RUN npm run build
+
 FROM alpine:3.20
 
 RUN apk add --no-cache ca-certificates tzdata wget
@@ -27,9 +35,10 @@ RUN apk add --no-cache ca-certificates tzdata wget
 RUN addgroup -S gatewayx && adduser -S gatewayx -G gatewayx
 
 COPY --from=builder /gatewayx /usr/local/bin/gatewayx
+COPY --from=dashboard-builder /dashboard/dist /opt/gatewayx/dashboard/dist
 
 RUN mkdir -p /etc/gatewayx /var/lib/gatewayx && \
-    chown -R gatewayx:gatewayx /etc/gatewayx /var/lib/gatewayx
+    chown -R gatewayx:gatewayx /etc/gatewayx /var/lib/gatewayx /opt/gatewayx
 
 USER gatewayx
 
