@@ -14,15 +14,17 @@ import (
 	"github.com/oni1997/gatewayx/internal/auth"
 	"github.com/oni1997/gatewayx/internal/config"
 	"github.com/oni1997/gatewayx/internal/ratelimit"
+	"github.com/oni1997/gatewayx/pkg/circuitbreaker"
 	"github.com/oni1997/gatewayx/pkg/loadbalancer"
 )
 
 type ReverseProxy struct {
-	config *config.Config
-	logger *slog.Logger
-	server *http.Server
-	routes map[string]*routeProxy
-	mu     sync.RWMutex
+	config    *config.Config
+	logger    *slog.Logger
+	server    *http.Server
+	routes    map[string]*routeProxy
+	breakers  map[string]*circuitbreaker.Breaker
+	mu        sync.RWMutex
 }
 
 type routeProxy struct {
@@ -34,9 +36,10 @@ type routeProxy struct {
 
 func New(cfg *config.Config, logger *slog.Logger) (*ReverseProxy, error) {
 	rp := &ReverseProxy{
-		config: cfg,
-		logger: logger,
-		routes: make(map[string]*routeProxy),
+		config:   cfg,
+		logger:   logger,
+		routes:   make(map[string]*routeProxy),
+		breakers: make(map[string]*circuitbreaker.Breaker),
 	}
 
 	for _, route := range cfg.Routes {
@@ -48,7 +51,31 @@ func New(cfg *config.Config, logger *slog.Logger) (*ReverseProxy, error) {
 	return rp, nil
 }
 
+func (rp *ReverseProxy) ReloadConfig(cfg *config.Config) error {
+	rp.mu.Lock()
+	defer rp.mu.Unlock()
+
+	rp.routes = make(map[string]*routeProxy)
+	rp.breakers = make(map[string]*circuitbreaker.Breaker)
+	rp.config = cfg
+
+	for _, route := range cfg.Routes {
+		if err := rp.addRouteLocked(route); err != nil {
+			return fmt.Errorf("failed to add route %s: %w", route.Name, err)
+		}
+	}
+
+	rp.logger.Info("configuration reloaded", "routes", len(rp.routes))
+	return nil
+}
+
 func (rp *ReverseProxy) addRoute(routeCfg config.RouteConfig) error {
+	rp.mu.Lock()
+	defer rp.mu.Unlock()
+	return rp.addRouteLocked(routeCfg)
+}
+
+func (rp *ReverseProxy) addRouteLocked(routeCfg config.RouteConfig) error {
 	backends := make([]*url.URL, 0, len(routeCfg.UpstreamURLs))
 	for _, u := range routeCfg.UpstreamURLs {
 		parsed, err := url.Parse(u)
@@ -59,9 +86,16 @@ func (rp *ReverseProxy) addRoute(routeCfg config.RouteConfig) error {
 	}
 
 	lb := loadbalancer.NewRoundRobin(backends)
+	cb := circuitbreaker.New(5, 3, 30*time.Second)
+	rp.breakers[routeCfg.Name] = cb
 
 	proxy := &httputil.ReverseProxy{
 		Rewrite: func(pr *httputil.ProxyRequest) {
+			if !cb.Allow() {
+				pr.Out.URL.Scheme = ""
+				pr.Out.URL.Host = ""
+				return
+			}
 			backend := lb.Next()
 			pr.Out.URL.Scheme = backend.Scheme
 			pr.Out.URL.Host = backend.Host
@@ -79,9 +113,14 @@ func (rp *ReverseProxy) addRoute(routeCfg config.RouteConfig) error {
 				"method", r.Method,
 				"path", r.URL.Path,
 			)
+			cb.Failure()
 			http.Error(w, "Bad Gateway", http.StatusBadGateway)
 		},
 		ModifyResponse: func(r *http.Response) error {
+			cb.Success()
+			if r.StatusCode >= 500 {
+				cb.Failure()
+			}
 			for k, v := range routeCfg.Headers {
 				r.Header.Set(k, v)
 			}
@@ -119,14 +158,12 @@ func (rp *ReverseProxy) addRoute(routeCfg config.RouteConfig) error {
 
 	handler = withLogger(rp.logger, routeCfg.Name)(handler)
 
-	rp.mu.Lock()
 	rp.routes[routeCfg.ListenPath] = &routeProxy{
 		config:   routeCfg,
 		handler:  handler,
 		balancer: lb,
 		logger:   rp.logger.With("route", routeCfg.Name),
 	}
-	rp.mu.Unlock()
 
 	return nil
 }

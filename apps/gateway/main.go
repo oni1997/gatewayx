@@ -10,6 +10,7 @@ import (
 
 	"github.com/oni1997/gatewayx/internal/ml"
 	"github.com/oni1997/gatewayx/internal/admin"
+	"github.com/oni1997/gatewayx/internal/alert"
 	"github.com/oni1997/gatewayx/internal/config"
 	"github.com/oni1997/gatewayx/internal/health"
 	"github.com/oni1997/gatewayx/internal/history"
@@ -45,6 +46,8 @@ func main() {
 	histBuf := history.NewBuffer(max(cfg.Metrics.History, 1000))
 	tracer := tracing.New(cfg.Metrics.Tracing, histBuf)
 	adminStore := admin.NewStore()
+	webhookURL := os.Getenv("GATEWAYX_WEBHOOK_URL")
+	wh := alert.NewWebhook(webhookURL)
 
 	rp, err := proxy.New(cfg, log)
 	if err != nil {
@@ -97,15 +100,34 @@ func main() {
 	}
 
 	sigCh := make(chan os.Signal, 1)
-	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
+	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
 
 	go func() {
-		<-sigCh
-		log.Info("shutting down...")
-		shutdownCtx, cancel := context.WithTimeout(context.Background(), cfg.Server.ShutdownTimeout)
-		defer cancel()
-		if err := server.Shutdown(shutdownCtx); err != nil {
-			log.Error("graceful shutdown failed", "error", err)
+		for sig := range sigCh {
+			switch sig {
+			case syscall.SIGHUP:
+				log.Info("received SIGHUP, reloading configuration...")
+				newCfg, err := config.LoadConfig(cfgFile)
+				if err != nil {
+					log.Error("failed to reload config", "error", err)
+					wh.Send("config_error", "Config Reload Failed", fmt.Sprintf("Failed to reload configuration: %v", err))
+					continue
+				}
+				if err := rp.ReloadConfig(newCfg); err != nil {
+					log.Error("failed to apply new config", "error", err)
+					wh.Send("config_error", "Config Reload Failed", fmt.Sprintf("Failed to apply new configuration: %v", err))
+					continue
+				}
+				log.Info("configuration reloaded successfully")
+			default:
+				log.Info("shutting down...")
+				shutdownCtx, cancel := context.WithTimeout(context.Background(), cfg.Server.ShutdownTimeout)
+				defer cancel()
+				if err := server.Shutdown(shutdownCtx); err != nil {
+					log.Error("graceful shutdown failed", "error", err)
+				}
+				return
+			}
 		}
 	}()
 

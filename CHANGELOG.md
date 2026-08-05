@@ -12,6 +12,17 @@ All notable changes to GatewayX will be documented in this file.
 - Package `internal/ai` renamed to `internal/ml` (machine learning, not AI)
 - Optimized README images: logo (73KB), architecture (495KB)
 
+## [0.3.0] — 2026-08-05
+
+### Added
+- Hot reload: edit gatewayx.yaml and send SIGHUP to reload without restart
+- Circuit breaker: automatic failure detection (5 failures → 30s open → half-open → 3 successes → closed)
+- Grafana dashboard template: 9-panel JSON dashboard for Prometheus
+- Webhook alerts: Slack/Discord alerts for rate limit spikes, security threats, backend failures
+
+### Fixed
+- Double mutex lock in proxy route builder causing deadlock
+
 ## [0.2.0] — 2026-08-05
 
 ### Added
@@ -50,6 +61,7 @@ All notable changes to GatewayX will be documented in this file.
 - Full documentation suite with ADRs
 - Docker and Podman deployment support
 
-[Unreleased]: https://github.com/oni1997/gatewayx/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/oni1997/gatewayx/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/oni1997/gatewayx/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/oni1997/gatewayx/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/oni1997/gatewayx/releases/tag/v0.1.0

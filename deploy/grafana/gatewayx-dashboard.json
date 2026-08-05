@@ -1,0 +1,75 @@
+{
+  "title": "GatewayX",
+  "uid": "gatewayx",
+  "tags": ["gatewayx", "api-gateway", "go"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "panels": [
+    {
+      "title": "Total Requests",
+      "type": "stat",
+      "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0},
+      "targets": [{"expr": "gatewayx_requests_total", "legendFormat": "Total"}],
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "thresholds": {"steps": [{"color": "green", "value": null}]}}}
+    },
+    {
+      "title": "Active Connections",
+      "type": "stat",
+      "gridPos": {"h": 4, "w": 6, "x": 6, "y": 0},
+      "targets": [{"expr": "gatewayx_active_connections", "legendFormat": "Active"}],
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "thresholds": {"steps": [{"color": "blue", "value": null}]}}}
+    },
+    {
+      "title": "Memory (MB)",
+      "type": "stat",
+      "gridPos": {"h": 4, "w": 6, "x": 12, "y": 0},
+      "targets": [{"expr": "gatewayx_memory_alloc_bytes / 1024 / 1024", "legendFormat": "Memory"}],
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "thresholds": {"steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 100}]}, "unit": "mbytes"}}
+    },
+    {
+      "title": "Goroutines",
+      "type": "stat",
+      "gridPos": {"h": 4, "w": 6, "x": 18, "y": 0},
+      "targets": [{"expr": "go_goroutines", "legendFormat": "Goroutines"}],
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "thresholds": {"steps": [{"color": "green", "value": null}]}}}
+    },
+    {
+      "title": "Requests per Second",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4},
+      "targets": [{"expr": "rate(gatewayx_requests_total[1m])", "legendFormat": "req/s"}],
+      "fieldConfig": {"defaults": {"unit": "reqps", "custom": {"fillOpacity": 20, "lineWidth": 2}}}
+    },
+    {
+      "title": "Bytes Throughput",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4},
+      "targets": [
+        {"expr": "rate(gatewayx_bytes_sent_total[1m])", "legendFormat": "Sent"},
+        {"expr": "rate(gatewayx_bytes_received_total[1m])", "legendFormat": "Received"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "Bps", "custom": {"fillOpacity": 15, "lineWidth": 2}}}
+    },
+    {
+      "title": "Route Latency (P95)",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12},
+      "targets": [{"expr": "gatewayx_route_latency_avg_ms", "legendFormat": "{{route}}"}],
+      "fieldConfig": {"defaults": {"unit": "ms", "custom": {"fillOpacity": 15, "lineWidth": 2}}}
+    },
+    {
+      "title": "Route Request Count",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 12},
+      "targets": [{"expr": "rate(gatewayx_route_requests_total[1m])", "legendFormat": "{{route}}"}],
+      "fieldConfig": {"defaults": {"unit": "reqps", "custom": {"fillOpacity": 15, "lineWidth": 2}}}
+    },
+    {
+      "title": "Active Connections Over Time",
+      "type": "timeseries",
+      "gridPos": {"h": 6, "w": 24, "x": 0, "y": 20},
+      "targets": [{"expr": "gatewayx_active_connections", "legendFormat": "Active"}],
+      "fieldConfig": {"defaults": {"custom": {"fillOpacity": 20, "lineWidth": 2}}}
+    }
+  ]
+}
