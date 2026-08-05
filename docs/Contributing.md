@@ -79,7 +79,7 @@ make coverage
 1. Ensure all tests pass
 2. Update documentation if needed
 3. Add an ADR for significant architectural changes
-4. Get review from at least one maintainer
+4. Get review from the maintainer ([@oni1997](https://github.com/oni1997))
 5. Squash merge to `main`
 
 ## Reporting Issues

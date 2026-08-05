@@ -4,6 +4,7 @@
 
 <h1 align="center">GatewayX</h1>
 <p align="center"><strong>Developer Infrastructure Platform</strong></p>
+<p align="center"><sub>by <a href="https://github.com/oni1997">Onesmus Maenzanise</a></sub></p>
 
 <p align="center">
   <a href="https://github.com/oni1997/gatewayx/blob/main/LICENSE"><img src="https://img.shields.io/github/license/oni1997/gatewayx" alt="License"></a>

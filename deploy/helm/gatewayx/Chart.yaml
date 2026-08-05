@@ -1,0 +1,17 @@
+apiVersion: v2
+name: gatewayx
+description: GatewayX - Developer Infrastructure Platform Helm Chart
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - gateway
+  - api-gateway
+  - reverse-proxy
+  - kubernetes
+home: https://github.com/oni1997/gatewayx
+sources:
+  - https://github.com/oni1997/gatewayx
+maintainers:
+  - name: Onesmus Maenzanise
+    email: dzidzaimaenza@gmail.com
