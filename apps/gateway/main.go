@@ -9,6 +9,7 @@ import (
 	"syscall"
 
 	"github.com/oni1997/gatewayx/internal/ml"
+	"github.com/oni1997/gatewayx/internal/admin"
 	"github.com/oni1997/gatewayx/internal/config"
 	"github.com/oni1997/gatewayx/internal/health"
 	"github.com/oni1997/gatewayx/internal/history"
@@ -43,6 +44,7 @@ func main() {
 	collector := metrics.NewCollector()
 	histBuf := history.NewBuffer(max(cfg.Metrics.History, 1000))
 	tracer := tracing.New(cfg.Metrics.Tracing, histBuf)
+	adminStore := admin.NewStore()
 
 	rp, err := proxy.New(cfg, log)
 	if err != nil {
@@ -76,6 +78,7 @@ func main() {
 			metricsMux.Handle("/bottlenecks", analysisSvc.BottlenecksHandler())
 			metricsMux.Handle("/recommendations", analysisSvc.RecommendationsHandler())
 			metricsMux.Handle("/analysis", analysisSvc.FullReportHandler())
+			metricsMux.Handle("/api/", admin.NewHandler(adminStore, collector))
 			metricsMux.Handle("/", dashboardHandler())
 			metricsAddr := fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Metrics.Port)
 			log.Info("dashboard available", "url", "http://"+metricsAddr)

@@ -12,6 +12,19 @@ All notable changes to GatewayX will be documented in this file.
 - Package `internal/ai` renamed to `internal/ml` (machine learning, not AI)
 - Optimized README images: logo (73KB), architecture (495KB)
 
+## [0.2.0] — 2026-08-05
+
+### Added
+- OAuth 2.0 authentication (GitHub and Google providers)
+- mTLS authentication with client certificate validation
+- Admin REST API for dashboard (API keys CRUD, certificate management, config)
+- E2E integration test with Podman (build, health, proxy, 404)
+- Rate limit + cache recommendations via ML analysis engine
+
+### Changed
+- CI: bumped all action versions to kill Node 20 deprecation warnings
+- Dashboard API Keys, Certs, Settings pages now wired to real backend
+
 ## [0.1.0] — 2026-08-05
 
 ### Added
@@ -37,5 +50,6 @@ All notable changes to GatewayX will be documented in this file.
 - Full documentation suite with ADRs
 - Docker and Podman deployment support
 
-[Unreleased]: https://github.com/oni1997/gatewayx/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/oni1997/gatewayx/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/oni1997/gatewayx/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/oni1997/gatewayx/releases/tag/v0.1.0

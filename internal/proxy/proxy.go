@@ -317,6 +317,24 @@ func buildAuthenticator(ac *config.AuthConfig) (auth.Authenticator, error) {
 			HeaderName:  opts["header_name"],
 		})
 
+	case auth.NameOAuth:
+		return auth.NewOAuth(auth.OAuthOptions{
+			Provider:     opts["provider"],
+			ClientID:     opts["client_id"],
+			ClientSecret: opts["client_secret"],
+			RedirectURL:  opts["redirect_url"],
+		})
+
+	case auth.NameMTLS:
+		verifyDepth := 1
+		if depthStr := opts["verify_depth"]; depthStr != "" {
+			_, _ = fmt.Sscanf(depthStr, "%d", &verifyDepth)
+		}
+		return auth.NewMTLS(auth.MTLS{
+			CACertFile:  opts["ca_cert"],
+			VerifyDepth: verifyDepth,
+		})
+
 	default:
 		return nil, fmt.Errorf("unknown auth type: %s", ac.Type)
 	}
