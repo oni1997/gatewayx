@@ -168,4 +168,4 @@ GatewayX does not include, bundle, or redistribute any proprietary code.
 
 ## License
 
-MIT — Copyright (c) 2024 Onesmus Maenzanise
+MIT — Copyright (c) 2026 Onesmus Maenzanise
