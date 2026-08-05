@@ -27,7 +27,6 @@ COPY apps/dashboard/package.json apps/dashboard/package-lock.json ./
 RUN npm ci
 COPY apps/dashboard/ ./
 RUN npm run build
-
 FROM alpine:3.20
 
 RUN apk add --no-cache ca-certificates tzdata wget
