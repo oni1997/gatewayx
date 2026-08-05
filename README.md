@@ -7,6 +7,7 @@
 <p align="center"><sub>by <a href="https://github.com/oni1997">Onesmus Maenzanise</a></sub></p>
 
 <p align="center">
+  <a href="https://github.com/oni1997/gatewayx/actions/workflows/ci.yml"><img src="https://github.com/oni1997/gatewayx/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="https://github.com/oni1997/gatewayx/blob/main/LICENSE"><img src="https://img.shields.io/github/license/oni1997/gatewayx" alt="License"></a>
   <a href="https://go.dev"><img src="https://img.shields.io/github/go-mod/go-version/oni1997/gatewayx" alt="Go Version"></a>
 </p>
