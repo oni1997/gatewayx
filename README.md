@@ -154,6 +154,18 @@ GOOS=linux GOARCH=arm64 go build -o bin/gatewayx ./apps/gateway
 
 Runs comfortably on a Pi 4 with 50-100MB RAM.
 
+## Third-Party Dependencies & Licenses
+
+| Package | Version | License | Usage |
+|---------|---------|---------|-------|
+| [spf13/cobra](https://github.com/spf13/cobra) | v1.10.2 | Apache 2.0 | CLI framework |
+| [spf13/viper](https://github.com/spf13/viper) | v1.21.0 | MIT | Configuration loading |
+| [golang-jwt/jwt](https://github.com/golang-jwt/jwt) | v5.3.1 | MIT | JWT parsing and validation |
+| [golang/go](https://go.dev) | 1.25 | BSD | Standard library (net/http, slog, crypto) |
+
+All third-party packages are included under their respective open-source licenses.
+GatewayX does not include, bundle, or redistribute any proprietary code.
+
 ## License
 
-MIT
+MIT — Copyright (c) 2024 Onesmus Maenzanise
