@@ -44,7 +44,7 @@ var serveCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		configFile, _ := cmd.Flags().GetString("config")
 		if configFile != "" {
-			os.Setenv("GATEWAYX_CONFIG", configFile)
+			_ = os.Setenv("GATEWAYX_CONFIG", configFile)
 		}
 		runServer()
 	},

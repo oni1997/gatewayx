@@ -38,7 +38,7 @@ routes:
 	if _, err := tmpfile.Write([]byte(yaml)); err != nil {
 		t.Fatal(err)
 	}
-	tmpfile.Close()
+	_ = tmpfile.Close()
 
 	cfg, err := LoadConfig(tmpfile.Name())
 	if err != nil {

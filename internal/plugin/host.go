@@ -76,7 +76,7 @@ func (h *Host) Shutdown() {
 	defer h.mu.Unlock()
 
 	for name, p := range h.plugins {
-		p.Close()
+		_ = p.Close()
 		delete(h.plugins, name)
 	}
 }

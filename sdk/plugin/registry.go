@@ -60,7 +60,7 @@ func (r *Registry) Unregister(name string) {
 	defer r.mu.Unlock()
 
 	if p, ok := r.plugins[name]; ok {
-		p.Close()
+		_ = p.Close()
 		delete(r.plugins, name)
 	}
 }
@@ -70,7 +70,7 @@ func (r *Registry) Shutdown() {
 	defer r.mu.Unlock()
 
 	for name, p := range r.plugins {
-		p.Close()
+		_ = p.Close()
 		delete(r.plugins, name)
 	}
 }

@@ -99,11 +99,11 @@ func TestBasicAuth_HtpasswdFile(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.Remove(f.Name())
+	defer func() { _ = os.Remove(f.Name()) }()
 	_, _ = f.WriteString("fileuser:filepass\n")
 	_, _ = f.WriteString("# comment line\n")
 	_, _ = f.WriteString("another:password123\n")
-	f.Close()
+	_ = f.Close()
 
 	ba, err := NewBasic(BasicOptions{
 		Htpasswd: f.Name(),
