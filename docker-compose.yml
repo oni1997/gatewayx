@@ -10,7 +10,6 @@ services:
       - "9090:9090"
     volumes:
       - ./gatewayx.example.yaml:/etc/gatewayx/gatewayx.yaml
-    command: ["-c", "/etc/gatewayx/gatewayx.yaml"]
 
   backend:
     image: nginx:alpine

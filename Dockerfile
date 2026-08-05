@@ -22,7 +22,7 @@ RUN CGO_ENABLED=0 go build \
 
 FROM alpine:3.20
 
-RUN apk add --no-cache ca-certificates tzdata
+RUN apk add --no-cache ca-certificates tzdata wget
 
 RUN addgroup -S gatewayx && adduser -S gatewayx -G gatewayx
 
@@ -33,10 +33,11 @@ RUN mkdir -p /etc/gatewayx /var/lib/gatewayx && \
 
 USER gatewayx
 
+ENV GATEWAYX_CONFIG=/etc/gatewayx/gatewayx.yaml
+
 EXPOSE 8080 9090
 
 HEALTHCHECK --interval=10s --timeout=3s --retries=3 \
     CMD wget -qO- http://localhost:8080/health || exit 1
 
 ENTRYPOINT ["gatewayx"]
-CMD ["-c", "/etc/gatewayx/gatewayx.yaml"]

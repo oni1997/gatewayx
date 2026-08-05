@@ -15,6 +15,8 @@ RUN go build -o /gatewayx ./apps/gateway
 FROM alpine:3.20
 
 RUN apk add --no-cache ca-certificates curl
+
+ENV GATEWAYX_CONFIG=/etc/gatewayx/gatewayx.yaml
 COPY --from=0 /gatewayx /usr/local/bin/gatewayx
 
 EXPOSE 8080 9090
