@@ -42,6 +42,7 @@ type OAuthAuthenticator struct {
 	clientID     string
 	clientSecret string
 	provider     oauthProvider
+	redirectURL  string
 	redirects    map[string]string
 	client       *http.Client
 }
@@ -67,9 +68,31 @@ func NewOAuth(opts OAuthOptions) (*OAuthAuthenticator, error) {
 		clientID:     opts.ClientID,
 		clientSecret: opts.ClientSecret,
 		provider:     prov,
+		redirectURL:  opts.RedirectURL,
 		redirects:    make(map[string]string),
 		client:       &http.Client{Timeout: 10 * time.Second},
 	}, nil
+}
+
+func (oa *OAuthAuthenticator) AuthURL(state string) string {
+	params := url.Values{}
+	params.Set("client_id", oa.clientID)
+	params.Set("response_type", "code")
+	params.Set("scope", oa.scope())
+	params.Set("state", state)
+	if oa.redirectURL != "" {
+		params.Set("redirect_uri", oa.redirectURL)
+	}
+	return oa.provider.authURL + "?" + params.Encode()
+}
+
+func (oa *OAuthAuthenticator) scope() string {
+	switch oa.provider.idField {
+	case "email":
+		return "openid email profile"
+	default:
+		return "read:user user:email"
+	}
 }
 
 func (oa *OAuthAuthenticator) Name() string {
@@ -78,6 +101,11 @@ func (oa *OAuthAuthenticator) Name() string {
 
 func (oa *OAuthAuthenticator) Authenticate(r *http.Request) (Claims, error) {
 	token := extractBearerToken(r)
+	if token == "" {
+		if cookie, err := r.Cookie("gatewayx_oauth"); err == nil && cookie.Value != "" {
+			token = cookie.Value
+		}
+	}
 	if token == "" {
 		return nil, fmt.Errorf("missing OAuth token")
 	}

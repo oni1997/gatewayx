@@ -15,9 +15,10 @@ type Store interface {
 }
 
 type Middleware struct {
-	store      Store
-	config     Config
-	extractors []KeyExtractor
+	store       Store
+	config      Config
+	extractors  []KeyExtractor
+	keyResolver func(rawKey string) string
 }
 
 func NewMiddleware(store Store, cfg Config) *Middleware {
@@ -27,6 +28,10 @@ func NewMiddleware(store Store, cfg Config) *Middleware {
 	}
 	mw.buildExtractors()
 	return mw
+}
+
+func (rm *Middleware) SetKeyResolver(resolver func(rawKey string) string) {
+	rm.keyResolver = resolver
 }
 
 func (rm *Middleware) buildExtractors() {
@@ -57,6 +62,11 @@ func (rm *Middleware) buildExtractors() {
 			key := r.Header.Get("X-API-Key")
 			if key == "" {
 				key = "anonymous"
+			}
+			if rm.keyResolver != nil {
+				if resolved := rm.keyResolver(key); resolved != "" {
+					return rm.config.RouteName + ":key:" + resolved
+				}
 			}
 			return rm.config.RouteName + ":key:" + key
 		})

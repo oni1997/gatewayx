@@ -17,6 +17,14 @@ type Config struct {
 	TLS      TLSConfig      `mapstructure:"tls"`
 	Health   HealthConfig   `mapstructure:"health"`
 	Security SecurityConfig `mapstructure:"security"`
+	OAuth    OAuthConfig    `mapstructure:"oauth"`
+}
+
+type OAuthConfig struct {
+	Provider     string `mapstructure:"provider"`
+	ClientID     string `mapstructure:"client_id"`
+	ClientSecret string `mapstructure:"client_secret"`
+	RedirectURL  string `mapstructure:"redirect_url"`
 }
 
 type ServerConfig struct {
@@ -45,6 +53,13 @@ type RouteConfig struct {
 	Authentication *AuthConfig        `mapstructure:"authentication"`
 	RateLimit      *RateLimitConfig   `mapstructure:"rate_limit"`
 	Compression    bool               `mapstructure:"compression"`
+	Websocket      bool               `mapstructure:"websocket"`
+	Cache          *CacheConfig       `mapstructure:"cache"`
+}
+
+type CacheConfig struct {
+	TTL      time.Duration `mapstructure:"ttl"`
+	MaxSize  int           `mapstructure:"max_size"`
 }
 
 type HealthCheckConfig struct {

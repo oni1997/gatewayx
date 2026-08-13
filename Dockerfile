@@ -20,6 +20,11 @@ RUN CGO_ENABLED=0 go build \
     -o /gatewayx \
     ./apps/gateway
 
+RUN CGO_ENABLED=0 go build \
+    -ldflags="-s -w -X main.version=${VERSION} -X main.commit=${COMMIT} -X main.buildDate=${BUILD_DATE}" \
+    -o /gatewayx-cli \
+    ./apps/cli
+
 FROM node:23-alpine AS dashboard-builder
 
 WORKDIR /dashboard
@@ -34,6 +39,7 @@ RUN apk add --no-cache ca-certificates tzdata wget
 RUN addgroup -S gatewayx && adduser -S gatewayx -G gatewayx
 
 COPY --from=builder /gatewayx /usr/local/bin/gatewayx
+COPY --from=builder /gatewayx-cli /usr/local/bin/gatewayx-cli
 COPY --from=dashboard-builder /dashboard/dist /opt/gatewayx/dashboard/dist
 
 RUN mkdir -p /etc/gatewayx /var/lib/gatewayx && \

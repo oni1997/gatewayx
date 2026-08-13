@@ -2,15 +2,23 @@
 
 All notable changes to GatewayX will be documented in this file.
 
-## [Unreleased]
+## [0.4.0] — 2026-08-05
 
 ### Added
-- ML analysis engine: security scanner, bottleneck finder, rate limit recommender
-- Container deployment section in README with Docker and Podman instructions
+- Response caching middleware (in-memory TTL, X-Cache headers)
+- WebSocket proxy support (connection upgrade)
+- `gatewayx init` interactive CLI config generator
+- SQLite persistence for API keys and certificates (survives restart)
+- OAuth 2.0 end-to-end flow (login, callback, logout) for GitHub/Google
+- Health-check-driven backend draining (health-aware load balancer)
+- Config hot-reload via file watching (auto-reload on change)
+- Compression middleware wired into proxy
+- `gatewayx-cli` binary included in Docker image
+- Per-key rate limiting integrated with admin API keys
 
 ### Changed
-- Package `internal/ai` renamed to `internal/ml` (machine learning, not AI)
-- Optimized README images: logo (73KB), architecture (495KB)
+- Load balancer: added health-aware round robin
+- README: comprehensive feature list, API endpoints, env vars
 
 ## [0.3.1] — 2026-08-05
 
@@ -69,7 +77,8 @@ All notable changes to GatewayX will be documented in this file.
 - Full documentation suite with ADRs
 - Docker and Podman deployment support
 
-[Unreleased]: https://github.com/oni1997/gatewayx/compare/v0.3.1...HEAD
+[Unreleased]: https://github.com/oni1997/gatewayx/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/oni1997/gatewayx/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/oni1997/gatewayx/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/oni1997/gatewayx/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/oni1997/gatewayx/compare/v0.1.0...v0.2.0

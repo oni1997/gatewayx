@@ -25,20 +25,27 @@ GatewayX is a high-performance, extensible API gateway built in Go. It serves as
 
 - **Reverse Proxy** -- HTTP/HTTPS forwarding with load balancing
 - **Host & Path Routing** -- Route traffic by hostname and URL path
-- **Load Balancing** -- Round-robin and weighted round-robin
-- **Authentication** -- JWT (HS256/RS256/ES256), API keys, Basic Auth, HMAC, OAuth-ready
+- **Load Balancing** -- Round-robin, weighted, and health-aware (backend draining)
+- **Authentication** -- JWT (HS256/RS256/ES256), API keys, Basic Auth, HMAC, OAuth 2.0 (GitHub/Google), mTLS
 - **RBAC** -- Role-based access control with path glob matching
 - **Session Management** -- In-memory TTL sessions with cookie/header support
 - **Rate Limiting** -- Token bucket and sliding window, per-IP, per-user, per-key
-- **Health Checks** -- Active upstream health monitoring with JSON endpoint
+- **Response Caching** -- In-memory TTL cache with `X-Cache` headers
+- **WebSocket Support** -- Proxies `Upgrade: websocket` connections
+- **Circuit Breaker** -- Auto-open on repeated failures, half-open probe recovery
+- **Health Checks** -- Active upstream monitoring with automatic backend draining
+- **Hot Reload** -- Edit config, auto-reloads via file watching (or SIGHUP)
+- **Persistence** -- SQLite backend for API keys and certificates (survives restart)
 - **TLS Support** -- HTTPS with certificate file or auto-cert (Let's Encrypt)
 - **Metrics** -- Prometheus-format metrics endpoint
+- **ML Analysis** -- Attack detection, bottleneck finder, rate limit recommendations (no LLM)
 - **Structured Logging** -- JSON or text logging via slog with configurable levels
+- **Webhook Alerts** -- Slack/Discord alerts for threats, rate limit spikes, backend failures
 - **Configuration File** -- YAML-based declarative configuration with env var overrides
-- **CLI Tool** -- Start, validate, and manage from the command line (Cobra)
-- **Docker Ready** -- Multi-stage Dockerfile and docker-compose included
+- **CLI Tool** -- `init` (interactive config), `serve`, `validate` (Cobra)
+- **Docker Ready** -- Multi-stage Dockerfile with gateway + CLI + dashboard
 - **Token Caching** -- In-memory JWT cache to reduce validation overhead
-- **Extensible** -- Plugin system (Phase 6)
+- **Extensible** -- Plugin system with lifecycle hooks
 
 ## Quick Start
 
@@ -84,14 +91,27 @@ server:
   host: "0.0.0.0"
   port: 8080
 
+oauth:
+  provider: "github"
+  client_id: "${GITHUB_CLIENT_ID}"
+  client_secret: "${GITHUB_CLIENT_SECRET}"
+  redirect_url: "http://localhost:9090/oauth/callback"
+
 routes:
   - name: "public-api"
     listen_path: "/api"
-    upstream_urls: ["http://backend:3000"]
+    upstream_urls: ["http://backend-1:3000", "http://backend-2:3000"]
     rate_limit:
       rate: 100
       burst: 200
       per_ip: true
+    cache:
+      ttl: 30s
+    compression: true
+    health_check:
+      path: "/health"
+      interval: 10s
+      unhealthy: 3
 
   - name: "admin-panel"
     listen_path: "/admin"
@@ -105,6 +125,11 @@ routes:
       rate: 10
       per_user: true
 
+  - name: "realtime-ws"
+    listen_path: "/ws"
+    upstream_urls: ["http://ws-svc:8080"]
+    websocket: true
+
 logging:
   level: "info"
   format: "json"
@@ -117,6 +142,31 @@ health:
   enabled: true
   path: "/health"
 ```
+
+## API Endpoints
+
+| Endpoint | Description |
+|----------|-------------|
+| `:8080/health` | Gateway health check |
+| `:9090/metrics` | Prometheus metrics |
+| `:9090/` | Web dashboard |
+| `:9090/history` | Request history (JSON) |
+| `:9090/security` | ML security scan |
+| `:9090/bottlenecks` | Bottleneck analysis |
+| `:9090/recommendations` | Rate limit / cache recommendations |
+| `:9090/analysis` | Full ML report |
+| `:9090/api/keys` | API key CRUD |
+| `:9090/api/certs` | Certificate CRUD |
+| `:9090/oauth/login` | OAuth login flow |
+
+## Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `GATEWAYX_CONFIG` | Config file path (default `gatewayx.yaml`) |
+| `GATEWAYX_DB_PATH` | SQLite database path for persistence |
+| `GATEWAYX_WEBHOOK_URL` | Slack/Discord webhook for alerts |
+| `GATEWAYX_DASHBOARD_PATH` | Dashboard static files path |
 
 ## Documentation
 
@@ -148,9 +198,8 @@ health:
 | Logging | slog |
 | Auth | golang-jwt/jwt |
 | Metrics | Prometheus |
-| Tracing | OpenTelemetry (Planned) |
-| Cache | Redis (optional) |
-| Dashboard | React + TypeScript + Tailwind (Planned) |
+| Storage | SQLite (modernc.org/sqlite, pure Go) |
+| Dashboard | React + TypeScript + Tailwind |
 | Build | GoReleaser |
 | Container | Docker |
 | CI/CD | GitHub Actions |
@@ -159,14 +208,14 @@ health:
 
 ```
 apps/       -- Application entry points (gateway, cli, dashboard)
-internal/   -- Internal packages (auth, config, proxy, ratelimit, middleware, health, logger)
-pkg/        -- Shared packages (loadbalancer, compression)
+internal/   -- auth, cache, config, proxy, ratelimit, ml, admin, health, oauth, etc.
+pkg/        -- Shared packages (loadbalancer, circuitbreaker, compression)
 plugins/    -- Plugin system
 examples/   -- Example configurations
 docs/       -- Full documentation suite
-deploy/     -- Deployment manifests
+deploy/     -- Deployment manifests (Helm, K8s, Grafana)
 sdk/        -- Plugin SDK
-tests/      -- Unit and integration tests
+tests/      -- Unit, integration, and E2E tests
 website/    -- Project website
 ```
 
@@ -186,6 +235,8 @@ Runs comfortably on a Pi 4 with 50-100MB RAM.
 | [spf13/cobra](https://github.com/spf13/cobra) | v1.10.2 | Apache 2.0 | CLI framework |
 | [spf13/viper](https://github.com/spf13/viper) | v1.21.0 | MIT | Configuration loading |
 | [golang-jwt/jwt](https://github.com/golang-jwt/jwt) | v5.3.1 | MIT | JWT parsing and validation |
+| [modernc.org/sqlite](https://pkg.go.dev/modernc.org/sqlite) | v1.56.0 | BSD | SQLite persistence (pure Go) |
+| [fsnotify/fsnotify](https://github.com/fsnotify/fsnotify) | v1.9.0 | BSD | Config file watching |
 | [golang/go](https://go.dev) | 1.25 | BSD | Standard library (net/http, slog, crypto) |
 
 All third-party packages are included under their respective open-source licenses.

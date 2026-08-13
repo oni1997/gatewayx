@@ -12,19 +12,28 @@ import (
 	"time"
 
 	"github.com/oni1997/gatewayx/internal/auth"
+	"github.com/oni1997/gatewayx/internal/cache"
 	"github.com/oni1997/gatewayx/internal/config"
+	"github.com/oni1997/gatewayx/internal/healthcheck"
 	"github.com/oni1997/gatewayx/internal/ratelimit"
 	"github.com/oni1997/gatewayx/pkg/circuitbreaker"
+	"github.com/oni1997/gatewayx/pkg/compression"
 	"github.com/oni1997/gatewayx/pkg/loadbalancer"
 )
 
 type ReverseProxy struct {
-	config    *config.Config
-	logger    *slog.Logger
-	server    *http.Server
-	routes    map[string]*routeProxy
-	breakers  map[string]*circuitbreaker.Breaker
-	mu        sync.RWMutex
+	config         *config.Config
+	logger         *slog.Logger
+	server         *http.Server
+	routes         map[string]*routeProxy
+	breakers       map[string]*circuitbreaker.Breaker
+	healthMonitors []*healthcheck.Monitor
+	keyResolver    func(rawKey string) string
+	mu             sync.RWMutex
+}
+
+func (rp *ReverseProxy) SetKeyResolver(resolver func(rawKey string) string) {
+	rp.keyResolver = resolver
 }
 
 type routeProxy struct {
@@ -55,8 +64,13 @@ func (rp *ReverseProxy) ReloadConfig(cfg *config.Config) error {
 	rp.mu.Lock()
 	defer rp.mu.Unlock()
 
+	for _, m := range rp.healthMonitors {
+		m.Stop()
+	}
+
 	rp.routes = make(map[string]*routeProxy)
 	rp.breakers = make(map[string]*circuitbreaker.Breaker)
+	rp.healthMonitors = nil
 	rp.config = cfg
 
 	for _, route := range cfg.Routes {
@@ -89,6 +103,21 @@ func (rp *ReverseProxy) addRouteLocked(routeCfg config.RouteConfig) error {
 	cb := circuitbreaker.New(5, 3, 30*time.Second)
 	rp.breakers[routeCfg.Name] = cb
 
+	var healthBalancer *loadbalancer.HealthAwareRoundRobin
+	var healthMonitor *healthcheck.Monitor
+	if routeCfg.HealthCheck != nil {
+		healthBalancer = loadbalancer.NewHealthAwareRoundRobin(backends)
+		healthMonitor = healthcheck.NewMonitor(healthBalancer, healthcheck.Config{
+			Path:      routeCfg.HealthCheck.Path,
+			Interval:  routeCfg.HealthCheck.Interval,
+			Timeout:   routeCfg.HealthCheck.Timeout,
+			Healthy:   routeCfg.HealthCheck.Healthy,
+			Unhealthy: routeCfg.HealthCheck.Unhealthy,
+		})
+		healthMonitor.Start()
+		rp.healthMonitors = append(rp.healthMonitors, healthMonitor)
+	}
+
 	proxy := &httputil.ReverseProxy{
 		Rewrite: func(pr *httputil.ProxyRequest) {
 			if !cb.Allow() {
@@ -96,7 +125,17 @@ func (rp *ReverseProxy) addRouteLocked(routeCfg config.RouteConfig) error {
 				pr.Out.URL.Host = ""
 				return
 			}
-			backend := lb.Next()
+			var backend *url.URL
+			if healthBalancer != nil {
+				backend = healthBalancer.Next()
+			} else {
+				backend = lb.Next()
+			}
+			if backend == nil {
+				pr.Out.URL.Scheme = ""
+				pr.Out.URL.Host = ""
+				return
+			}
 			pr.Out.URL.Scheme = backend.Scheme
 			pr.Out.URL.Host = backend.Host
 			if routeCfg.StripPath {
@@ -129,7 +168,12 @@ func (rp *ReverseProxy) addRouteLocked(routeCfg config.RouteConfig) error {
 	}
 
 	var handler http.Handler = proxy
-	handler = withTimeout(handler, routeCfg.Timeout)
+
+	if routeCfg.Websocket {
+		handler = withWebSocketUpgrade(handler)
+	} else {
+		handler = withTimeout(handler, routeCfg.Timeout)
+	}
 
 	if routeCfg.Authentication != nil {
 		authenticator, err := buildAuthenticator(routeCfg.Authentication)
@@ -153,7 +197,17 @@ func (rp *ReverseProxy) addRouteLocked(routeCfg config.RouteConfig) error {
 		}
 		rlStore := buildRateLimitStore(rlCfg)
 		rlMw := ratelimit.NewMiddleware(rlStore, rlCfg)
+		rlMw.SetKeyResolver(rp.keyResolver)
 		handler = rlMw.Handler(handler)
+	}
+
+	if routeCfg.Cache != nil && routeCfg.Cache.TTL > 0 {
+		routeCache := cache.New(routeCfg.Cache.TTL, routeCfg.Cache.MaxSize)
+		handler = cache.Middleware(routeCache)(handler)
+	}
+
+	if routeCfg.Compression {
+		handler = compression.GzipMiddleware(handler)
 	}
 
 	handler = withLogger(rp.logger, routeCfg.Name)(handler)
@@ -233,6 +287,15 @@ func withTimeout(next http.Handler, timeout time.Duration) http.Handler {
 		return next
 	}
 	return http.TimeoutHandler(next, timeout, "Gateway Timeout")
+}
+
+func withWebSocketUpgrade(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.EqualFold(r.Header.Get("Upgrade"), "websocket") {
+			r.Header.Set("Connection", "Upgrade")
+		}
+		next.ServeHTTP(w, r)
+	})
 }
 
 func withLogger(logger *slog.Logger, name string) func(http.Handler) http.Handler {

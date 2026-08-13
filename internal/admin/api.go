@@ -32,9 +32,10 @@ type Certificate struct {
 }
 
 type Store struct {
-	mu   sync.RWMutex
-	keys map[string]*APIKey
-	certs map[string]*Certificate
+	mu      sync.RWMutex
+	keys    map[string]*APIKey
+	certs   map[string]*Certificate
+	persist *Persistence
 }
 
 func NewStore() *Store {
@@ -42,6 +43,34 @@ func NewStore() *Store {
 		keys:  make(map[string]*APIKey),
 		certs: make(map[string]*Certificate),
 	}
+}
+
+func NewStoreWithPersistence(dbPath string) (*Store, error) {
+	s := NewStore()
+
+	p, err := NewPersistence(dbPath)
+	if err != nil {
+		return nil, err
+	}
+	s.persist = p
+
+	keys, err := p.LoadKeys()
+	if err != nil {
+		return nil, err
+	}
+	for _, k := range keys {
+		s.keys[k.Key] = k
+	}
+
+	certs, err := p.LoadCerts()
+	if err != nil {
+		return nil, err
+	}
+	for _, c := range certs {
+		s.certs[c.ID] = c
+	}
+
+	return s, nil
 }
 
 func (s *Store) CreateKey(name, owner string) (*APIKey, string) {
@@ -62,6 +91,11 @@ func (s *Store) CreateKey(name, owner string) (*APIKey, string) {
 	}
 
 	s.keys[fullKey] = key
+
+	if s.persist != nil {
+		_ = s.persist.SaveKey(key)
+	}
+
 	return key, fullKey
 }
 
@@ -72,6 +106,9 @@ func (s *Store) ValidateKey(rawKey string) (*APIKey, bool) {
 	key, ok := s.keys[rawKey]
 	if ok {
 		key.LastUsed = time.Now()
+		if s.persist != nil {
+			_ = s.persist.UpdateLastUsed(key.ID, key.LastUsed)
+		}
 	}
 	return key, ok
 }
@@ -96,6 +133,9 @@ func (s *Store) RevokeKey(id string) bool {
 	for raw, key := range s.keys {
 		if key.ID == id {
 			delete(s.keys, raw)
+			if s.persist != nil {
+				_ = s.persist.DeleteKey(id)
+			}
 			return true
 		}
 	}
@@ -115,6 +155,9 @@ func (s *Store) AddCertificate(domain, issuer string, notAfter time.Time) *Certi
 		Status:    certStatus(notAfter),
 	}
 	s.certs[cert.ID] = cert
+	if s.persist != nil {
+		_ = s.persist.SaveCert(cert)
+	}
 	return cert
 }
 
