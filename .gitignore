@@ -56,3 +56,8 @@ create.md
 # Dashboard
 apps/dashboard/node_modules/
 apps/dashboard/dist/
+
+# Docs website
+website/node_modules/
+website/.vitepress/cache/
+website/.vitepress/dist/

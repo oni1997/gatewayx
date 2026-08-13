@@ -1,0 +1,35 @@
+# OAuth 2.0 with GitHub
+
+server:
+  host: "0.0.0.0"
+  port: 8080
+
+oauth:
+  provider: "github"
+  client_id: "${GITHUB_CLIENT_ID}"
+  client_secret: "${GITHUB_CLIENT_SECRET}"
+  redirect_url: "https://gateway.example.com:9090/oauth/callback"
+
+routes:
+  - name: "oauth-protected"
+    listen_path: "/dashboard"
+    upstream_urls:
+      - "http://dashboard:3000"
+    authentication:
+      type: "oauth"
+      options:
+        provider: "github"
+        client_id: "${GITHUB_CLIENT_ID}"
+        client_secret: "${GITHUB_CLIENT_SECRET}"
+
+logging:
+  level: "info"
+  format: "json"
+
+metrics:
+  enabled: true
+  port: 9090
+
+health:
+  enabled: true
+  path: "/health"

@@ -21,6 +21,30 @@
 
 GatewayX is a high-performance, extensible API gateway built in Go. It serves as the foundation for a suite of developer infrastructure tools -- think Traefik and Kong, but built around the developer experience first.
 
+## Screenshots
+
+### Dashboard
+
+<p align="center">
+  <img src="dashboard.png" alt="GatewayX Dashboard" width="800">
+</p>
+
+### Grafana Dashboards
+
+<p align="center">
+  <img src="grafana-dashboard.png" alt="GatewayX Grafana Dashboard" width="800">
+</p>
+
+<p align="center">
+  <img src="grafana-metrics.png" alt="GatewayX Grafana Metrics" width="800">
+</p>
+
+### Terminal
+
+<p align="center">
+  <img src="terminal.png" alt="GatewayX Terminal" width="800">
+</p>
+
 ## Features
 
 - **Reverse Proxy** -- HTTP/HTTPS forwarding with load balancing

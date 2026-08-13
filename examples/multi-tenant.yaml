@@ -1,0 +1,46 @@
+# Multi-tenant API with per-key rate limiting
+
+server:
+  host: "0.0.0.0"
+  port: 8080
+
+routes:
+  - name: "tenant-api"
+    listen_path: "/v1"
+    upstream_urls:
+      - "http://api:3000"
+    authentication:
+      type: "api_key"
+      options:
+        header: "X-API-Key"
+        keys_file: "/etc/gatewayx/api_keys.txt"
+    rate_limit:
+      rate: 100
+      burst: 200
+      per_key: true
+      strategy: "token_bucket"
+    compression: true
+
+  - name: "admin-console"
+    listen_path: "/admin"
+    upstream_urls:
+      - "http://admin:4000"
+    authentication:
+      type: "jwt"
+      options:
+        secret: "${ADMIN_JWT_SECRET}"
+    rate_limit:
+      rate: 20
+      per_user: true
+
+logging:
+  level: "info"
+  format: "json"
+
+metrics:
+  enabled: true
+  port: 9090
+
+health:
+  enabled: true
+  path: "/health"

@@ -1,0 +1,51 @@
+# Production-grade route with auth, caching, rate limiting, compression, and health checks
+
+server:
+  host: "0.0.0.0"
+  port: 8080
+
+routes:
+  - name: "production-api"
+    listen_path: "/api"
+    upstream_urls:
+      - "http://backend-1:3000"
+      - "http://backend-2:3000"
+    load_balancing: "round_robin"
+    strip_path: false
+    timeout: 30s
+    compression: true
+    cache:
+      ttl: 60s
+      max_size: 5000
+    health_check:
+      path: "/health"
+      interval: 10s
+      timeout: 5s
+      healthy: 3
+      unhealthy: 3
+    authentication:
+      type: "jwt"
+      options:
+        secret: "${JWT_SECRET}"
+        algorithm: "HS256"
+    rate_limit:
+      rate: 100
+      burst: 200
+      per_ip: true
+      strategy: "token_bucket"
+    headers:
+      X-Frame-Options: "DENY"
+      X-Content-Type-Options: "nosniff"
+
+logging:
+  level: "info"
+  format: "json"
+
+metrics:
+  enabled: true
+  port: 9090
+  tracing: true
+
+health:
+  enabled: true
+  path: "/health"

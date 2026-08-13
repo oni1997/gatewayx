@@ -1,0 +1,100 @@
+version: 2
+
+project_name: gatewayx
+
+before:
+  hooks:
+    - go mod tidy
+    - go generate ./...
+
+builds:
+  - id: gatewayx
+    main: ./apps/gateway
+    binary: gatewayx
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.buildDate={{.Date}}
+    mod_timestamp: "{{ .CommitTimestamp }}"
+
+  - id: gatewayx-cli
+    main: ./apps/cli
+    binary: gatewayx-cli
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.buildDate={{.Date}}
+    mod_timestamp: "{{ .CommitTimestamp }}"
+
+archives:
+  - id: default
+    formats:
+      - tar.gz
+      - zip
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- .Version }}_
+      {{- .Os }}_
+      {{- .Arch }}
+
+nfpms:
+  - id: packages
+    package_name: gatewayx
+    vendor: Onesmus Maenzanise
+    homepage: https://github.com/oni1997/gatewayx
+    maintainer: Onesmus Maenzanise <dzidzaimaenza@gmail.com>
+    description: GatewayX - Developer Infrastructure Platform
+    license: MIT
+    formats:
+      - deb
+      - rpm
+    bindir: /usr/bin
+
+brews:
+  - name: gatewayx
+    repository:
+      owner: oni1997
+      name: homebrew-tap
+    commit_author:
+      name: oni1997
+      email: dzidzaimaenza@gmail.com
+    homepage: https://github.com/oni1997/gatewayx
+    description: GatewayX - Developer Infrastructure Platform
+    license: MIT
+
+checksum:
+  name_template: "checksums.txt"
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
+      - Merge pull request
+      - Merge branch
+
+release:
+  github:
+    owner: oni1997
+    name: gatewayx
+  draft: false
+  prerelease: false
