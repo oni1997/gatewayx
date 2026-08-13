@@ -64,20 +64,6 @@ nfpms:
       - rpm
     bindir: /usr/bin
 
-brews:
-  - name: gatewayx
-    ids:
-      - gatewayx
-    repository:
-      owner: oni1997
-      name: homebrew-tap
-    commit_author:
-      name: oni1997
-      email: dzidzaimaenza@gmail.com
-    homepage: https://github.com/oni1997/gatewayx
-    description: GatewayX - Developer Infrastructure Platform
-    license: MIT
-
 checksum:
   name_template: "checksums.txt"
 
