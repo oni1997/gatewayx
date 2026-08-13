@@ -5,9 +5,6 @@ hero:
   name: GatewayX
   text: Developer Infrastructure Platform
   tagline: A high-performance, extensible API gateway built in Go. Configuration over code.
-  image:
-    src: /logo.png
-    alt: GatewayX
   actions:
     - theme: brand
       text: Get Started

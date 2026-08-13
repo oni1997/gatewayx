@@ -7,7 +7,6 @@ export default defineConfig({
   base: '/gatewayx/',
   cleanUrls: true,
   themeConfig: {
-    logo: '/logo.png',
     nav: [
       { text: 'Guide', link: '/guide/getting-started' },
       { text: 'GitHub', link: 'https://github.com/oni1997/gatewayx' },
