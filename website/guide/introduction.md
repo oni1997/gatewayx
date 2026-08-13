@@ -3,7 +3,6 @@
 GatewayX is a high-performance, extensible API gateway built in Go. It serves as the foundation for a suite of developer infrastructure tools — think Traefik and Kong, but built around the developer experience first.
 
 ## Philosophy
-
 - **Configuration over code** — Solve 95% of problems through configuration
 - **Sane defaults** — Works in production without hours of tuning
 - **Observability first** — Metrics, logs, and traces from day one
