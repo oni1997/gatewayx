@@ -8,9 +8,11 @@
 
 <p align="center">
   <a href="https://github.com/oni1997/gatewayx/actions/workflows/ci.yml"><img src="https://github.com/oni1997/gatewayx/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://codecov.io/gh/oni1997/gatewayx"><img src="https://codecov.io/gh/oni1997/gatewayx/branch/main/graph/badge.svg" alt="Coverage"></a>
   <a href="https://github.com/oni1997/gatewayx/pkgs/container/gatewayx"><img src="https://img.shields.io/badge/container-ghcr-blue" alt="Container"></a>
   <a href="https://github.com/oni1997/gatewayx/blob/main/LICENSE"><img src="https://img.shields.io/github/license/oni1997/gatewayx" alt="License"></a>
   <a href="https://go.dev"><img src="https://img.shields.io/github/go-mod/go-version/oni1997/gatewayx" alt="Go Version"></a>
+  <a href="https://oni1997.github.io/gatewayx/"><img src="https://img.shields.io/badge/docs-online-brightgreen" alt="Docs"></a>
 </p>
 
 <p align="center">
