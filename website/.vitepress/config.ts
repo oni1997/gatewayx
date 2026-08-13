@@ -4,6 +4,7 @@ export default defineConfig({
   title: 'GatewayX',
   description: 'Developer Infrastructure Platform',
   lang: 'en-US',
+  base: '/gatewayx/',
   cleanUrls: true,
   themeConfig: {
     logo: '/logo.png',

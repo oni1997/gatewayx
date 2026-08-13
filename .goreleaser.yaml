@@ -66,6 +66,8 @@ nfpms:
 
 brews:
   - name: gatewayx
+    ids:
+      - gatewayx
     repository:
       owner: oni1997
       name: homebrew-tap
