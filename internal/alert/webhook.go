@@ -44,7 +44,7 @@ func (w *Webhook) Send(eventType, title, message string) {
 
 	go func() {
 		payload := map[string]any{
-			"text": fmt.Sprintf("🔔 *%s*\n\n%s\n\n_%s_", title, message, time.Now().Format(time.RFC3339)),
+			"text": fmt.Sprintf("[%s]\n\n%s\n\n_%s_", title, message, time.Now().Format(time.RFC3339)),
 		}
 
 		body, _ := json.Marshal(payload)

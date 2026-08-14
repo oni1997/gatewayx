@@ -89,7 +89,7 @@ var validateCmd = &cobra.Command{
 		if len(warnings) > 0 {
 			fmt.Printf("\n%d warning(s):\n", len(warnings))
 			for _, w := range warnings {
-				fmt.Printf("  ⚠  %s\n", w)
+				fmt.Printf("  !  %s\n", w)
 			}
 		} else {
 			fmt.Println("No warnings. Configuration looks production-ready.")

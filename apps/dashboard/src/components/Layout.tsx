@@ -1,48 +1,54 @@
 import { Outlet, NavLink } from 'react-router-dom';
+import { HomeIcon, ServerIcon, ChartIcon, ClockIcon, KeyIcon, ShieldIcon, HeartIcon, GearIcon } from './Icons';
 
 const links = [
-  { to: '/', label: 'Home', icon: '●' },
-  { to: '/services', label: 'Services', icon: '◇' },
-  { to: '/metrics', label: 'Metrics', icon: '◆' },
-  { to: '/history', label: 'History', icon: '◈' },
-  { to: '/api-keys', label: 'API Keys', icon: '▣' },
-  { to: '/certificates', label: 'Certs', icon: '◉' },
-  { to: '/health', label: 'Health', icon: '○' },
-  { to: '/settings', label: 'Settings', icon: '◎' },
+  { to: '/', label: 'Overview', Icon: HomeIcon },
+  { to: '/services', label: 'Services', Icon: ServerIcon },
+  { to: '/metrics', label: 'Metrics', Icon: ChartIcon },
+  { to: '/history', label: 'Request Log', Icon: ClockIcon },
+  { to: '/api-keys', label: 'API Keys', Icon: KeyIcon },
+  { to: '/certificates', label: 'Certificates', Icon: ShieldIcon },
+  { to: '/health', label: 'Health', Icon: HeartIcon },
+  { to: '/settings', label: 'Settings', Icon: GearIcon },
 ];
 
 export default function Layout() {
   return (
-    <div className="flex h-screen">
-      <aside className="w-60 bg-dark-card border-r border-dark-border p-4 flex flex-col">
-        <div className="flex items-center gap-2 mb-8 px-2">
-          <span className="text-xl font-bold text-primary">GatewayX</span>
+    <div className="flex h-screen bg-dark">
+      <aside className="w-60 bg-dark-card border-r border-dark-border flex flex-col shrink-0">
+        <div className="flex items-center gap-2.5 px-5 h-16 border-b border-dark-border">
+          <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
+            <span className="text-white font-bold text-sm">G</span>
+          </div>
+          <span className="font-semibold text-[15px] tracking-tight text-white">GatewayX</span>
         </div>
-        <nav className="flex flex-col gap-1">
-          {links.map((link) => (
+        <nav className="flex flex-col gap-0.5 p-3 flex-1 overflow-y-auto">
+          {links.map(({ to, label, Icon }) => (
             <NavLink
-              key={link.to}
-              to={link.to}
-              end={link.to === '/'}
+              key={to}
+              to={to}
+              end={to === '/'}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition ${
+                `flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors ${
                   isActive
-                    ? 'bg-primary/20 text-primary'
-                    : 'text-gray-400 hover:text-gray-200 hover:bg-dark-border/50'
+                    ? 'bg-primary/10 text-primary-light'
+                    : 'text-gray-400 hover:text-gray-200 hover:bg-dark-hover'
                 }`
               }
             >
-              <span>{link.icon}</span>
-              {link.label}
+              <Icon className="w-[18px] h-[18px]" />
+              {label}
             </NavLink>
           ))}
         </nav>
-        <div className="mt-auto pt-4 border-t border-dark-border text-xs text-gray-500">
-          v0.3.1
+        <div className="px-5 py-4 border-t border-dark-border text-[11px] text-gray-500">
+          v0.4.0
         </div>
       </aside>
-      <main className="flex-1 overflow-auto p-6">
-        <Outlet />
+      <main className="flex-1 overflow-auto">
+        <div className="max-w-6xl mx-auto px-8 py-8">
+          <Outlet />
+        </div>
       </main>
     </div>
   );
