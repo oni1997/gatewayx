@@ -100,6 +100,7 @@ func Run(cfgFile string, v Version) {
 			metricsMux.Handle(cfg.Metrics.Path, metrics.Exporter(collector))
 			metricsMux.Handle("/history", histBuf.Handler())
 			metricsMux.Handle("/health", checker.Handler())
+			metricsMux.Handle("/version", versionHandler(v))
 			metricsMux.Handle("/security", analysisSvc.SecurityHandler())
 			metricsMux.Handle("/bottlenecks", analysisSvc.BottlenecksHandler())
 			metricsMux.Handle("/recommendations", analysisSvc.RecommendationsHandler())
@@ -193,4 +194,11 @@ func Run(cfgFile string, v Version) {
 	}
 
 	log.Info("gateway stopped")
+}
+
+func versionHandler(v Version) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprintf(w, `{"version":%q,"commit":%q,"build_date":%q}`, v.Version, v.Commit, v.BuildDate)
+	})
 }

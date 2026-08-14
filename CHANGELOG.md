@@ -2,6 +2,15 @@
 
 All notable changes to GatewayX will be documented in this file.
 
+## [0.4.4] — 2026-08-14
+
+### Fixed
+- `gatewayx-cli serve` now actually starts the gateway (was a stub)
+- Extracted shared server logic into `internal/server` package
+
+### Added
+- Admin API authentication (`admin.token` config)
+
 ## [0.4.0] — 2026-08-05
 
 ### Added
@@ -77,7 +86,11 @@ All notable changes to GatewayX will be documented in this file.
 - Full documentation suite with ADRs
 - Docker and Podman deployment support
 
-[Unreleased]: https://github.com/oni1997/gatewayx/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/oni1997/gatewayx/compare/v0.4.4...HEAD
+[0.4.4]: https://github.com/oni1997/gatewayx/compare/v0.4.3...v0.4.4
+[0.4.3]: https://github.com/oni1997/gatewayx/compare/v0.4.2...v0.4.3
+[0.4.2]: https://github.com/oni1997/gatewayx/compare/v0.4.1...v0.4.2
+[0.4.1]: https://github.com/oni1997/gatewayx/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/oni1997/gatewayx/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/oni1997/gatewayx/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/oni1997/gatewayx/compare/v0.2.0...v0.3.0

@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Outlet, NavLink } from 'react-router-dom';
 import { HomeIcon, ServerIcon, ChartIcon, ClockIcon, KeyIcon, ShieldIcon, HeartIcon, GearIcon } from './Icons';
 
@@ -13,6 +14,15 @@ const links = [
 ];
 
 export default function Layout() {
+  const [version, setVersion] = useState('');
+
+  useEffect(() => {
+    fetch('/version')
+      .then((r) => r.json())
+      .then((d) => setVersion(d.version))
+      .catch(() => setVersion(''));
+  }, []);
+
   return (
     <div className="flex h-screen bg-dark">
       <aside className="w-60 bg-dark-card border-r border-dark-border flex flex-col shrink-0">
@@ -42,7 +52,7 @@ export default function Layout() {
           ))}
         </nav>
         <div className="px-5 py-4 border-t border-dark-border text-[11px] text-gray-500">
-          v0.4.0
+          {version || 'dev'}
         </div>
       </aside>
       <main className="flex-1 overflow-auto">
