@@ -43,6 +43,7 @@ export default defineConfig({
             { text: 'Security', link: '/guide/security' },
             { text: 'Plugins', link: '/guide/plugins' },
             { text: 'Deployment', link: '/guide/deployment' },
+            { text: 'CLI Reference', link: '/guide/cli' },
           ],
         },
       ],
