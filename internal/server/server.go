@@ -199,6 +199,6 @@ func Run(cfgFile string, v Version) {
 func versionHandler(v Version) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintf(w, `{"version":%q,"commit":%q,"build_date":%q}`, v.Version, v.Commit, v.BuildDate)
+		_, _ = fmt.Fprintf(w, `{"version":%q,"commit":%q,"build_date":%q}`, v.Version, v.Commit, v.BuildDate)
 	})
 }
