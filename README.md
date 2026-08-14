@@ -13,6 +13,8 @@
   <a href="https://github.com/oni1997/gatewayx/blob/main/LICENSE"><img src="https://img.shields.io/github/license/oni1997/gatewayx" alt="License"></a>
   <a href="https://go.dev"><img src="https://img.shields.io/github/go-mod/go-version/oni1997/gatewayx" alt="Go Version"></a>
   <a href="https://oni1997.github.io/gatewayx/"><img src="https://img.shields.io/badge/docs-online-brightgreen" alt="Docs"></a>
+  <a href="https://github.com/oni1997/gatewayx"><img src="https://img.shields.io/github/stars/oni1997/gatewayx" alt="Stars"></a>
+  <a href="https://github.com/oni1997/gatewayx"><img src="https://img.shields.io/github/forks/oni1997/gatewayx" alt="Forks"></a>
 </p>
 
 <p align="center">
@@ -306,6 +308,14 @@ Runs comfortably on a Pi 4 with 50-100MB RAM.
 
 All third-party packages are included under their respective open-source licenses.
 GatewayX does not include, bundle, or redistribute any proprietary code.
+
+## Contributors
+
+<a href="https://github.com/oni1997/gatewayx/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=oni1997/gatewayx" alt="Contributors" />
+</a>
+
+Built and maintained by [Onesmus Maenzanise](https://github.com/oni1997).
 
 ## License
 
