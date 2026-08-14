@@ -14,17 +14,31 @@ authentication:
     keys_file: "/etc/gatewayx/api_keys.txt"
 ```
 
+Keys file format (`key:owner`, one per line):
+```
+sk-abc123:admin
+sk-def456:readonly
+```
+
 ### JWT
 
 ```yaml
 authentication:
   type: "jwt"
   options:
-    secret: "${JWT_SECRET}"
-    algorithm: "HS256"
-    claims:
-      - "sub"
-      - "exp"
+    secret: "${JWT_SECRET}"       # HMAC secret (or secret_file)
+    algorithm: "HS256"             # HS256, RS256, ES256
+    cache_ttl: 5m                  # Optional token cache
+```
+
+For RS256/ES256, use `public_key_file` instead of `secret`:
+
+```yaml
+authentication:
+  type: "jwt"
+  options:
+    public_key_file: "/etc/gatewayx/public.pem"
+    algorithm: "RS256"
 ```
 
 ### Basic Auth
@@ -33,19 +47,38 @@ authentication:
 authentication:
   type: "basic"
   options:
-    users_file: "/etc/gatewayx/users.htpasswd"
+    realm: "GatewayX"
+    htpasswd_file: "/etc/gatewayx/users.htpasswd"
+```
+
+Or inline users:
+
+```yaml
+authentication:
+  type: "basic"
+  options:
+    admin: "password123"
 ```
 
 ### OAuth 2.0
 
 ```yaml
 authentication:
-  type: "oauth2"
+  type: "oauth"
   options:
-    provider: "github"
+    provider: "github"             # github or google
     client_id: "${OAUTH_CLIENT_ID}"
     client_secret: "${OAUTH_CLIENT_SECRET}"
-    redirect_url: "https://gateway.example.com/oauth/callback"
+```
+
+The full login flow (login, callback, logout) is enabled via the top-level `oauth` config block:
+
+```yaml
+oauth:
+  provider: "github"
+  client_id: "${OAUTH_CLIENT_ID}"
+  client_secret: "${OAUTH_CLIENT_SECRET}"
+  redirect_url: "https://gateway.example.com:9090/oauth/callback"
 ```
 
 ### mTLS
@@ -58,49 +91,74 @@ authentication:
     verify_depth: 2
 ```
 
+Validates the client certificate against the CA. Identity is extracted from the certificate CN.
+
 ### HMAC
 
 ```yaml
 authentication:
   type: "hmac"
   options:
-    algorithm: "sha256"
+    algorithm: "sha256"            # sha256 or sha512
     secret: "${HMAC_SECRET}"
     header: "X-Signature"
+    clock_skew: 5m
+```
+
+Signature format: `key_id|timestamp|signature`.
+
+### Session
+
+```yaml
+authentication:
+  type: "session"
+  options:
+    ttl: 30m
+    max_sessions: 10000
 ```
 
 ## RBAC & Permissions
 
-Role-based access control can be layered on top of authentication:
+RBAC wraps another authenticator and adds role-based path/method checks:
+
+```yaml
+authentication:
+  type: "rbac"
+  options:
+    delegate: "jwt"                # The underlying auth type
+    secret: "${JWT_SECRET}"
+    roles_claim: "roles"
+    perm_1: "/admin/**:admin:GET,POST"
+    perm_2: "/api/**:admin,developer"
+    perm_3: "/public/*:guest:GET"
+```
+
+Permission format: `path:roles:methods` (methods optional). Supports `**` (recursive) and `*` (single segment) wildcards.
+
+## Token Caching
+
+JWT tokens can be cached in-memory to avoid re-validating signatures:
 
 ```yaml
 authentication:
   type: "jwt"
   options:
     secret: "${JWT_SECRET}"
-    roles_claim: "roles"
-    permissions:
-      - path: "/admin/**"
-        roles: ["admin"]
-      - path: "/api/**"
-        roles: ["admin", "developer"]
+    cache_ttl: 5m
 ```
 
-## Token Caching
+The cache respects the JWT `exp` claim — entries expire at the earlier of `cache_ttl` or token expiry.
 
-For JWT and OAuth, GatewayX can cache validated tokens in Redis to reduce upstream authentication calls:
+## Admin API Authentication
+
+The admin API (`/api/*`) is protected separately via the `admin.token` config:
 
 ```yaml
-authentication:
-  type: "jwt"
-  options:
-    cache:
-      enabled: true
-      ttl: 300s
-      backend: "redis"
-      redis:
-        addr: "localhost:6379"
+admin:
+  token: "${ADMIN_TOKEN}"
 ```
+
+Requests require `Authorization: Bearer <token>` or `?token=<token>`.
 
 ## Upcoming
 

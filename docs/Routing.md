@@ -146,6 +146,10 @@ routes:
     timeout: 30s
     retry_count: 2
     compression: true
+    websocket: false
+    cache:
+      ttl: 60s
+      max_size: 5000
     headers:
       X-Frame-Options: "DENY"
       X-Content-Type-Options: "nosniff"
@@ -163,4 +167,35 @@ routes:
       rate: 1000
       burst: 2000
       strategy: "token_bucket"
+      per_ip: true
 ```
+
+## WebSocket Routes
+
+```yaml
+routes:
+  - name: "realtime"
+    listen_path: "/ws"
+    upstream_urls: ["http://ws-backend:8080"]
+    websocket: true
+```
+
+When `websocket: true`, the timeout handler is skipped (WebSockets are long-lived) and connection upgrade is handled.
+
+## Response Caching
+
+```yaml
+routes:
+  - name: "cached"
+    listen_path: "/api"
+    upstream_urls: ["http://backend:3000"]
+    cache:
+      ttl: 30s
+      max_size: 1000
+```
+
+Only `GET` and `HEAD` requests are cached. Responses include `X-Cache: HIT` or `X-Cache: MISS`.
+
+## Circuit Breaker
+
+Every route automatically gets a circuit breaker: 5 failures opens the circuit for 30s, then half-open probing allows 3 successful requests to close it. This prevents cascading failures when a backend is down.
