@@ -194,6 +194,24 @@ health:
 | `GATEWAYX_WEBHOOK_URL` | Slack/Discord webhook for alerts |
 | `GATEWAYX_DASHBOARD_PATH` | Dashboard static files path |
 
+## Performance
+
+GatewayX is a thin proxy layer over Go's `net/http` with minimal per-request overhead. When logging and metrics are disabled, the proxy path is near-transparent.
+
+Benchmark methodology (`scripts/bench.sh`): `hey` with 50 concurrent connections, 10s duration, proxying to nginx.
+
+| Environment | Throughput | Latency (p50) |
+|-------------|-----------|---------------|
+| WSL2 + rootless Podman | ~3,000 req/s | ~10ms |
+
+> **Note:** The number above was measured on WSL2 with rootless Podman, which introduces container-to-container networking overhead. On native Linux or a cloud VM, Go reverse proxies typically achieve 20-50k req/s. The WSL2 measurement is the floor, not the ceiling.
+
+Run your own benchmark:
+
+```bash
+./scripts/bench.sh
+```
+
 ## Documentation
 
 | Doc | |
