@@ -46,7 +46,7 @@ var serveCmd = &cobra.Command{
 		if configFile != "" {
 			_ = os.Setenv("GATEWAYX_CONFIG", configFile)
 		}
-		runServer()
+		runServer(configFile)
 	},
 }
 
