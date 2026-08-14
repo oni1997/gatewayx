@@ -60,6 +60,7 @@ func main() {
 	} else {
 		adminStore = admin.NewStore()
 	}
+	adminStore.SetAuditLog(admin.NewAuditLog(log))
 	webhookURL := os.Getenv("GATEWAYX_WEBHOOK_URL")
 	wh := alert.NewWebhook(webhookURL)
 

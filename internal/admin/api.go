@@ -36,6 +36,7 @@ type Store struct {
 	keys    map[string]*APIKey
 	certs   map[string]*Certificate
 	persist *Persistence
+	audit   *AuditLog
 }
 
 func NewStore() *Store {
@@ -43,6 +44,10 @@ func NewStore() *Store {
 		keys:  make(map[string]*APIKey),
 		certs: make(map[string]*Certificate),
 	}
+}
+
+func (s *Store) SetAuditLog(a *AuditLog) {
+	s.audit = a
 }
 
 func NewStoreWithPersistence(dbPath string) (*Store, error) {
@@ -96,6 +101,10 @@ func (s *Store) CreateKey(name, owner string) (*APIKey, string) {
 		_ = s.persist.SaveKey(key)
 	}
 
+	if s.audit != nil {
+		s.audit.Record("key_created", "api_key", "name="+name+" owner="+owner+" id="+id)
+	}
+
 	return key, fullKey
 }
 
@@ -136,6 +145,9 @@ func (s *Store) RevokeKey(id string) bool {
 			if s.persist != nil {
 				_ = s.persist.DeleteKey(id)
 			}
+			if s.audit != nil {
+				s.audit.Record("key_revoked", "api_key", "id="+id+" name="+key.Name+" owner="+key.Owner)
+			}
 			return true
 		}
 	}
@@ -157,6 +169,9 @@ func (s *Store) AddCertificate(domain, issuer string, notAfter time.Time) *Certi
 	s.certs[cert.ID] = cert
 	if s.persist != nil {
 		_ = s.persist.SaveCert(cert)
+	}
+	if s.audit != nil {
+		s.audit.Record("cert_added", "certificate", "domain="+domain+" issuer="+issuer)
 	}
 	return cert
 }
@@ -250,6 +265,15 @@ func NewHandler(store *Store, collector *metrics.Collector) http.Handler {
 			"requests":  snapshot.Requests,
 			"routes":    snapshot.Routes,
 		})
+	})
+
+	mux.HandleFunc("GET /api/audit", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		if store.audit == nil {
+			_ = json.NewEncoder(w).Encode([]AuditEntry{})
+			return
+		}
+		_ = json.NewEncoder(w).Encode(store.audit.Snapshot())
 	})
 
 	return mux

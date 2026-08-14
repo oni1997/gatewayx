@@ -64,7 +64,36 @@ var validateCmd = &cobra.Command{
 			fmt.Fprintf(os.Stderr, "Configuration invalid: %v\n", err)
 			os.Exit(1)
 		}
+
+		var warnings []string
+		for _, route := range cfg.Routes {
+			if route.Authentication == nil {
+				warnings = append(warnings, fmt.Sprintf("route %q has no authentication configured", route.Name))
+			}
+			if route.RateLimit == nil {
+				warnings = append(warnings, fmt.Sprintf("route %q has no rate limiting configured", route.Name))
+			}
+			if route.Timeout == 0 {
+				warnings = append(warnings, fmt.Sprintf("route %q has no explicit timeout (uses server default)", route.Name))
+			}
+			if len(route.UpstreamURLs) == 1 && route.HealthCheck == nil {
+				warnings = append(warnings, fmt.Sprintf("route %q has a single upstream with no health check", route.Name))
+			}
+		}
+
+		if cfg.Metrics.Enabled && cfg.Metrics.Tracing {
+			warnings = append(warnings, "tracing is enabled but no OpenTelemetry exporter is configured")
+		}
+
 		fmt.Printf("Configuration is valid (%d routes configured)\n", len(cfg.Routes))
+		if len(warnings) > 0 {
+			fmt.Printf("\n%d warning(s):\n", len(warnings))
+			for _, w := range warnings {
+				fmt.Printf("  ⚠  %s\n", w)
+			}
+		} else {
+			fmt.Println("No warnings. Configuration looks production-ready.")
+		}
 	},
 }
 
