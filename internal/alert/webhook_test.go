@@ -3,6 +3,7 @@ package alert
 import (
 	"net/http"
 	"net/http/httptest"
+	"sync/atomic"
 	"testing"
 	"time"
 )
@@ -32,9 +33,9 @@ func TestWebhook_Send(t *testing.T) {
 }
 
 func TestWebhook_Cooldown(t *testing.T) {
-	calls := 0
+	var calls int32
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		calls++
+		atomic.AddInt32(&calls, 1)
 		w.WriteHeader(http.StatusOK)
 	}))
 	defer server.Close()
@@ -47,8 +48,8 @@ func TestWebhook_Cooldown(t *testing.T) {
 
 	time.Sleep(200 * time.Millisecond)
 
-	if calls != 1 {
-		t.Errorf("expected 1 call due to cooldown, got %d", calls)
+	if atomic.LoadInt32(&calls) != 1 {
+		t.Errorf("expected 1 call due to cooldown, got %d", atomic.LoadInt32(&calls))
 	}
 }
 
