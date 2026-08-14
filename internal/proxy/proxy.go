@@ -301,6 +301,10 @@ func withWebSocketUpgrade(next http.Handler) http.Handler {
 func withLogger(logger *slog.Logger, name string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if !logger.Enabled(r.Context(), slog.LevelInfo) {
+				next.ServeHTTP(w, r)
+				return
+			}
 			start := time.Now()
 			sw := &statusWriter{ResponseWriter: w, status: http.StatusOK}
 			next.ServeHTTP(sw, r)

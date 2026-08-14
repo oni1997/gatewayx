@@ -87,8 +87,10 @@ func main() {
 	var handler http.Handler = mux
 	handler = middleware.Recovery(handler)
 	handler = middleware.MaxBodySize(cfg.Security.MaxBodySize)(handler)
-	handler = metrics.Middleware(collector)(handler)
-	handler = tracer.Middleware(handler)
+	if cfg.Metrics.Enabled {
+		handler = metrics.Middleware(collector)(handler)
+		handler = tracer.Middleware(handler)
+	}
 
 	if cfg.Metrics.Enabled {
 		log.Info("metrics enabled", "port", cfg.Metrics.Port)
