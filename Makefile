@@ -1,4 +1,4 @@
-.PHONY: build run test lint clean dev docker
+.PHONY: build run test lint clean dev docker bench
 
 APP_NAME := gatewayx
 BIN_DIR := bin
@@ -52,6 +52,9 @@ docker-run:
 
 install:
 	go install ./apps/cli
+
+bench:
+	./scripts/bench.sh
 
 deps:
 	go mod tidy

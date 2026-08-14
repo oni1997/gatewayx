@@ -103,7 +103,7 @@ func main() {
 			metricsMux.Handle("/bottlenecks", analysisSvc.BottlenecksHandler())
 			metricsMux.Handle("/recommendations", analysisSvc.RecommendationsHandler())
 			metricsMux.Handle("/analysis", analysisSvc.FullReportHandler())
-			metricsMux.Handle("/api/", admin.NewHandler(adminStore, collector))
+			metricsMux.Handle("/api/", admin.RequireAuth(admin.NewHandler(adminStore, collector), cfg.Admin.Token))
 
 			if cfg.OAuth.Provider != "" && cfg.OAuth.ClientID != "" && cfg.OAuth.ClientSecret != "" {
 				oauthAuth, err := auth.NewOAuth(auth.OAuthOptions{

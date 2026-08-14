@@ -18,6 +18,11 @@ type Config struct {
 	Health   HealthConfig   `mapstructure:"health"`
 	Security SecurityConfig `mapstructure:"security"`
 	OAuth    OAuthConfig    `mapstructure:"oauth"`
+	Admin    AdminConfig    `mapstructure:"admin"`
+}
+
+type AdminConfig struct {
+	Token string `mapstructure:"token"`
 }
 
 type OAuthConfig struct {

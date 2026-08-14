@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math/big"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -202,13 +203,13 @@ func certStatus(notAfter time.Time) string {
 
 func NewHandler(store *Store, collector *metrics.Collector) http.Handler {
 	mux := http.NewServeMux()
-
-	mux.HandleFunc("GET /api/keys", func(w http.ResponseWriter, r *http.Request) {
+	adminMux := http.NewServeMux()
+	adminMux.HandleFunc("GET /api/keys", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(store.ListKeys())
 	})
 
-	mux.HandleFunc("POST /api/keys", func(w http.ResponseWriter, r *http.Request) {
+	adminMux.HandleFunc("POST /api/keys", func(w http.ResponseWriter, r *http.Request) {
 		var req struct {
 			Name  string `json:"name"`
 			Owner string `json:"owner"`
@@ -228,7 +229,7 @@ func NewHandler(store *Store, collector *metrics.Collector) http.Handler {
 		_ = json.NewEncoder(w).Encode(result)
 	})
 
-	mux.HandleFunc("DELETE /api/keys/{id}", func(w http.ResponseWriter, r *http.Request) {
+	adminMux.HandleFunc("DELETE /api/keys/{id}", func(w http.ResponseWriter, r *http.Request) {
 		id := r.PathValue("id")
 		if store.RevokeKey(id) {
 			w.WriteHeader(http.StatusNoContent)
@@ -237,12 +238,12 @@ func NewHandler(store *Store, collector *metrics.Collector) http.Handler {
 		}
 	})
 
-	mux.HandleFunc("GET /api/certs", func(w http.ResponseWriter, r *http.Request) {
+	adminMux.HandleFunc("GET /api/certs", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(store.ListCertificates())
 	})
 
-	mux.HandleFunc("POST /api/certs", func(w http.ResponseWriter, r *http.Request) {
+	adminMux.HandleFunc("POST /api/certs", func(w http.ResponseWriter, r *http.Request) {
 		var req struct {
 			Domain  string `json:"domain"`
 			Issuer  string `json:"issuer"`
@@ -257,7 +258,7 @@ func NewHandler(store *Store, collector *metrics.Collector) http.Handler {
 		_ = json.NewEncoder(w).Encode(cert)
 	})
 
-	mux.HandleFunc("GET /api/config", func(w http.ResponseWriter, r *http.Request) {
+	adminMux.HandleFunc("GET /api/config", func(w http.ResponseWriter, r *http.Request) {
 		snapshot := collector.Snapshot()
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(map[string]any{
@@ -267,7 +268,7 @@ func NewHandler(store *Store, collector *metrics.Collector) http.Handler {
 		})
 	})
 
-	mux.HandleFunc("GET /api/audit", func(w http.ResponseWriter, r *http.Request) {
+	adminMux.HandleFunc("GET /api/audit", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		if store.audit == nil {
 			_ = json.NewEncoder(w).Encode([]AuditEntry{})
@@ -276,7 +277,36 @@ func NewHandler(store *Store, collector *metrics.Collector) http.Handler {
 		_ = json.NewEncoder(w).Encode(store.audit.Snapshot())
 	})
 
+	mux.Handle("/api/", adminMux)
+
 	return mux
+}
+
+func RequireAuth(next http.Handler, token string) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if token == "" {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		auth := r.Header.Get("Authorization")
+		provided := ""
+		if strings.HasPrefix(auth, "Bearer ") {
+			provided = strings.TrimPrefix(auth, "Bearer ")
+		}
+		if provided == "" {
+			provided = r.URL.Query().Get("token")
+		}
+
+		if provided != token {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusUnauthorized)
+			_, _ = w.Write([]byte(`{"error":"unauthorized","message":"invalid admin token"}`))
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
 }
 
 func generateID() string {

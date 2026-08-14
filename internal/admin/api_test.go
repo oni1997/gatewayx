@@ -203,3 +203,70 @@ func TestAuditEndpoint_NilAudit(t *testing.T) {
 		t.Errorf("expected 200, got %d", rec.Code)
 	}
 }
+
+func TestRequireAuth_NoTokenConfigured(t *testing.T) {
+	store := NewStore()
+	handler := RequireAuth(NewHandler(store, metrics.NewCollector()), "")
+
+	req := httptest.NewRequest("GET", "/api/keys", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Errorf("expected 200 with no token configured, got %d", rec.Code)
+	}
+}
+
+func TestRequireAuth_ValidBearerToken(t *testing.T) {
+	store := NewStore()
+	handler := RequireAuth(NewHandler(store, metrics.NewCollector()), "secret-token")
+
+	req := httptest.NewRequest("GET", "/api/keys", nil)
+	req.Header.Set("Authorization", "Bearer secret-token")
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Errorf("expected 200 with valid token, got %d", rec.Code)
+	}
+}
+
+func TestRequireAuth_MissingToken(t *testing.T) {
+	store := NewStore()
+	handler := RequireAuth(NewHandler(store, metrics.NewCollector()), "secret-token")
+
+	req := httptest.NewRequest("GET", "/api/keys", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusUnauthorized {
+		t.Errorf("expected 401 without token, got %d", rec.Code)
+	}
+}
+
+func TestRequireAuth_InvalidToken(t *testing.T) {
+	store := NewStore()
+	handler := RequireAuth(NewHandler(store, metrics.NewCollector()), "secret-token")
+
+	req := httptest.NewRequest("GET", "/api/keys", nil)
+	req.Header.Set("Authorization", "Bearer wrong-token")
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusUnauthorized {
+		t.Errorf("expected 401 with invalid token, got %d", rec.Code)
+	}
+}
+
+func TestRequireAuth_QueryParamToken(t *testing.T) {
+	store := NewStore()
+	handler := RequireAuth(NewHandler(store, metrics.NewCollector()), "secret-token")
+
+	req := httptest.NewRequest("GET", "/api/keys?token=secret-token", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Errorf("expected 200 with query token, got %d", rec.Code)
+	}
+}
