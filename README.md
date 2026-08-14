@@ -73,6 +73,27 @@ GatewayX is a high-performance, extensible API gateway built in Go. It serves as
 - **Token Caching** -- In-memory JWT cache to reduce validation overhead
 - **Extensible** -- Plugin system with lifecycle hooks
 
+## Comparison
+
+| | GatewayX | Traefik | Kong | Caddy | Envoy |
+|---|---|---|---|---|---|
+| Language | Go | Go | Go + Nginx | Go | C++ |
+| Reverse proxy | Yes | Yes | Yes | Yes | Yes |
+| JWT / API key auth | Yes | Yes | Yes | Plugins | Yes |
+| OAuth 2.0 | Yes | Yes | Yes | Plugins | Yes |
+| mTLS | Yes | Yes | Yes | Yes | Yes |
+| Rate limiting | Built-in | Yes | Yes | Plugins | Yes |
+| Response caching | Built-in | Plugins | Yes | Plugins | Yes |
+| WebSocket | Yes | Yes | Yes | Yes | Yes |
+| Circuit breaker | Yes | Yes | Yes | No | Yes |
+| Health-check draining | Yes | Yes | Yes | No | Yes |
+| Config hot reload | Yes | Yes | Yes | Yes | Yes |
+| Dashboard | Built-in | Traefik Hub | Kong Manager | No | No |
+| Persistence (SQLite) | Built-in | Plugins | DB required | No | No |
+| Attack detection (ML) | Built-in | No | No | No | No |
+| Config complexity | Low | Low | High | Low | Very high |
+| Learning curve | Minutes | Hours | Days | Minutes | Weeks |
+
 ## Quick Start
 
 ```bash
